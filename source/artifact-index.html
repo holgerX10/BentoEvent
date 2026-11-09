@@ -1095,7 +1095,8 @@ const sorted = () => { const list = [...state.events].filter(e => !state.hidden.
   return list.sort((a,b) => key(a).localeCompare(key(b))); };
 function visible(){ const q = state.q.trim().toLowerCase(); return sorted().filter(e => (state.filter === 'alla' || e.category === state.filter) && (!state.city || (e.city||'').toLowerCase() === state.city.toLowerCase()) && (!state.by || e.by === state.by) && (state.showPast || !isPast(e)) && (!q || [e.title,e.venue,e.city,e.note,catOf(e.category).label].join(' ').toLowerCase().includes(q))); }
 const filtersActive = () => state.sort !== 'datum' || !!state.city || !!state.by || !state.showPast;
-function artHTML(ev, cls='art'){ const c = catOf(ev.category); return ev.image ? `<div class="${cls}"><img src="${ev.image}" alt="" loading="lazy" decoding="async"></div>` : `<div class="${cls}" style="background:linear-gradient(135deg,${c.g[0]},${c.g[1]})"></div>`; }
+const okImg = u => !!u && u.length > 40 && !/^data:,/.test(u);
+function artHTML(ev, cls='art'){ const c = catOf(ev.category); return okImg(ev.image) ? `<div class="${cls}" style="background:linear-gradient(135deg,${c.g[0]},${c.g[1]})"><img src="${ev.image}" alt="" loading="lazy" decoding="async" onerror="this.remove()"></div>` : `<div class="${cls}" style="background:linear-gradient(135deg,${c.g[0]},${c.g[1]})"></div>`; }
 function render(){
   renderChips(); renderCount(); renderGuest(); renderNew(); renderExamples();
   if (state.view === 'rutnat') renderGrid(); else renderTimeline();
@@ -1447,7 +1448,8 @@ function shrinkImage(file){
 /* Image pipeline: decode → (Claude reads it: fields + crop box) → crop → level → card image (data URL) + full-size blob for assets */
 function loadImg(file){ return new Promise((res, rej) => { const img = new Image(); const url = URL.createObjectURL(file); img.onload = () => res({ img, url }); img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('bild')); }; img.src = url; }); }
 function drawCrop(img, crop, max){
-  const sx = Math.round((crop?.x || 0) * img.naturalWidth), sy = Math.round((crop?.y || 0) * img.naturalHeight), sw = Math.round((crop?.w || 1) * img.naturalWidth), sh = Math.round((crop?.h || 1) * img.naturalHeight);
+  const W = img.naturalWidth || img.width, H = img.naturalHeight || img.height; // <img> or <canvas>
+  const sx = Math.round((crop?.x || 0) * W), sy = Math.round((crop?.y || 0) * H), sw = Math.max(1, Math.round((crop?.w || 1) * W)), sh = Math.max(1, Math.round((crop?.h || 1) * H));
   const s = Math.min(1, max / Math.max(sw, sh)); const cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round(sw * s)); cv.height = Math.max(1, Math.round(sh * s));
   const ctx = cv.getContext('2d'); ctx.drawImage(img, sx, sy, sw, sh, 0, 0, cv.width, cv.height); return cv;
 }
@@ -1459,7 +1461,7 @@ function trimUniform(img){
   let top = 0, bot = cv.height - 1; while (top < cv.height * 0.3 && rowVar(top) < 28) top++; while (bot > cv.height * 0.7 && rowVar(bot) < 28) bot--;
   return { x: 0, y: top / cv.height, w: 1, h: (bot - top + 1) / cv.height };
 }
-function cvToDataUrl(cv, maxLen=170000){ let q = 0.82, out = cv.toDataURL('image/jpeg', q); while (out.length > maxLen && q > 0.4) { q -= 0.1; out = cv.toDataURL('image/jpeg', q); } return out; }
+function cvToDataUrl(cv, maxLen=170000){ if (!cv.width || !cv.height) return ''; let q = 0.82, out = cv.toDataURL('image/jpeg', q); while (out.length > maxLen && q > 0.4) { q -= 0.1; out = cv.toDataURL('image/jpeg', q); } return out; }
 const cvToBlob = (cv, q=0.86) => new Promise(res => cv.toBlob(res, 'image/jpeg', q));
 let jsqrP = null;
 function loadJsQR(){ if (window.jsQR) return Promise.resolve(window.jsQR); if (jsqrP) return jsqrP; jsqrP = new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js'; sc.onload = () => res(window.jsQR); sc.onerror = () => rej(new Error('jsqr')); document.head.appendChild(sc); }); return jsqrP; }
