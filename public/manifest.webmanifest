@@ -1,0 +1,29 @@
+{
+  "name": "Bento",
+  "short_name": "Bento",
+  "description": "Spara allt kul som kommer: konserter, teater, bio och resor som bento-kort.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF5E6",
+  "theme_color": "#FFF5E6",
+  "lang": "sv",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": { "title": "title", "text": "text", "url": "url", "files": [ { "name": "image", "accept": ["image/*"] } ] }
+  },
+  "shortcuts": [
+    { "name": "Nytt kort", "short_name": "Nytt", "url": "/#add", "icons": [ { "src": "/icon-192.png", "sizes": "192x192" } ] },
+    { "name": "Tidslinje", "url": "/#tidslinje", "icons": [ { "src": "/icon-192.png", "sizes": "192x192" } ] }
+  ]
+}

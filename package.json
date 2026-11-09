@@ -1,0 +1,1 @@
+{"name":"bentoevent","private":true,"type":"module","dependencies":{"@netlify/functions":"^4.0.0","@supabase/supabase-js":"^2.119.0"}}
