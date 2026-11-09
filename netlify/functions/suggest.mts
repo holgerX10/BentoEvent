@@ -1,4 +1,5 @@
 import type { Config } from "@netlify/functions"
+import { catalogFind, catalogPut, cacheGet, cachePut, norm, sameTitle } from "../lib/catalog.mts"
 
 // Turns a few words, a pasted link or what Claude read off a photo into 1–3 concrete event candidates,
 // using web search for dates, venue, official page and poster images. The client asks the user to pick.
@@ -33,6 +34,23 @@ export default async (req: Request) => {
   const today = String(body.today || new Date().toISOString().slice(0, 10))
   if (!text && !seen) return Response.json({ error: "empty" }, { status: 400 })
 
+  // 1. Same question today → same answer (shared across users)
+  const ckey = [norm(text), seen ? norm(seen.title || "") : "", seen ? String(seen.date || "") : "", today].join("|")
+  const cached = await cacheGet(ckey)
+  if (cached && Array.isArray(cached.candidates) && cached.candidates.length) return Response.json({ ...cached, source: "cache" })
+
+  // 2. A poster we have seen before → answer from the catalog, no web search
+  const q = (seen && seen.title) || text
+  if (q && q.length >= 3) {
+    const hits = (await catalogFind(q, today)).filter(h => sameTitle(h.title, q) >= 0.55 || (seen && seen.title && norm(h.title).includes(norm(seen.title))))
+    if (hits.length && (seen?.title || hits[0].images?.length)) {
+      const cands = hits.slice(0, 4).map((h, i) => ({ ...h, match: i === 0, why: h.hits > 1 ? `Sparat av ${h.hits} personer` : "Från katalogen" }))
+      return Response.json({ candidates: cands, question: "", source: "catalog" })
+    }
+  }
+
+  // 3. Ask Claude with web search. A fully read poster only needs the official page and image → small, fast model.
+  const complete = !!(seen && seen.title && (seen.date || seen.endDate) && (seen.venue || seen.city))
   const prompt = `Du hjälper appen Bento att spara kommande evenemang (konsert, teater, bio, sport, resa, mat, fest).
 Idag är det ${today}. Användaren bor i Stockholm om inget annat framgår.
 Användaren skrev: ${JSON.stringify(text)}
@@ -43,12 +61,14 @@ Sök på webben och ta reda på vilket/vilka verkliga evenemang det gäller. Hit
 Är det en film: svensk biopremiär (dateKind "fran"). En föreställning med många speldagar: premiär eller första datum + endDate, dateKind "period", och lista några kommande speldagar i "dates".
 Gissa aldrig datum som inte står någonstans; lämna då date tomt och dateKind "okant".
 
+Resor (category "resa"): titel som "Resa till X", date = avresa, endDate = hemresa, dateKind "exakt". Ingen url till turistsajter; url bara om det finns en bokning. Inga note-gissningar.
+Markera med "match": true de kandidater som exakt motsvarar det användaren skrev (rätt dag, tid och plats). Andra rimliga alternativ (andra dagar, närliggande evenemang) får "match": false.
 Svara ENDAST med JSON:
-{"candidates":[{"title":"","category":"konsert|teater|bio|resa|sport|mat|fest|annat","venue":"","city":"","date":"YYYY-MM-DD","dateKind":"exakt|fran|period|okant","endDate":"","time":"HH:MM","dates":["YYYY-MM-DD"],"url":"https://officiell eller biljettsida","pages":["upp till 3 andra url:er med bra bild, t.ex. filmbolag, teater, Wikipedia"],"why":"max 8 ord, varför det passar","note":"max 20 ord"}],"question":"en kort följdfråga om något är oklart, annars tom"}
-Högst 3 kandidater, bästa först. Svenska.`
+{"candidates":[{"match":true,"title":"","category":"konsert|teater|bio|resa|sport|mat|fest|annat","venue":"","city":"","date":"YYYY-MM-DD","dateKind":"exakt|fran|period|okant","endDate":"","time":"HH:MM","dates":["YYYY-MM-DD"],"url":"https://officiell eller biljettsida","pages":["upp till 3 andra url:er med bra bild, t.ex. filmbolag, teater, Wikipedia"],"why":"max 8 ord, varför det passar","note":"max 20 ord"}],"question":"en kort följdfråga om något är oklart, annars tom"}
+Högst ${complete ? 2 : 5} kandidater, matchningar först. note bara om det är användbart för besökaren. Svenska.`
 
   const messages: any[] = [{ role: "user", content: prompt }]
-  const model = Netlify.env.get("ANTHROPIC_SUGGEST_MODEL") || Netlify.env.get("ANTHROPIC_MODEL") || "claude-sonnet-5-5"
+  const model = complete ? (Netlify.env.get("ANTHROPIC_FAST_MODEL") || "claude-haiku-5-5") : (Netlify.env.get("ANTHROPIC_SUGGEST_MODEL") || "claude-sonnet-5-5")
   let out = ""
   for (let turn = 0; turn < 3; turn++) {
     const r = await fetch("https://api.anthropic.com/v1/messages", {
@@ -56,7 +76,7 @@ Högst 3 kandidater, bästa först. Svenska.`
       headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
       body: JSON.stringify({
         model, max_tokens: 1800, messages,
-        tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 4, user_location: { type: "approximate", city: "Stockholm", country: "SE", timezone: "Europe/Stockholm" } }],
+        tools: [{ type: "web_search_20250305", name: "web_search", max_uses: complete ? 2 : 4, user_location: { type: "approximate", city: "Stockholm", country: "SE", timezone: "Europe/Stockholm" } }],
       }),
       signal: AbortSignal.timeout(40000),
     })
@@ -78,7 +98,9 @@ Högst 3 kandidater, bästa först. Svenska.`
     c.images = [...new Set(imgs.filter(Boolean))].slice(0, 4)
     delete c.pages
   }))
-  return Response.json({ candidates: cands, question: String(data.question || "") })
+  const payload = { candidates: cands, question: String(data.question || "") }
+  if (cands.length) await Promise.all([cachePut(ckey, payload), catalogPut(cands.map((c: any) => ({ ...c, match: undefined, why: undefined })))])
+  return Response.json({ ...payload, source: "ai" })
 }
 
 export const config: Config = { path: "/api/suggest", method: ["POST"] }

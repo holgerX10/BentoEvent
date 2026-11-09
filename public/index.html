@@ -431,6 +431,17 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .fold{margin-top:4px}.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:12px 0;font-weight:700;color:var(--muted);font-size:14px}
 .fold>summary::-webkit-details-marker{display:none}.fold>summary::after{content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin-left:auto;transition:transform var(--d-med)}
 .fold[open]>summary::after{transform:rotate(-135deg)}
+.cand.best{padding:12px;border-width:2px;border-color:color-mix(in srgb,var(--text) 16%,transparent)}
+.cand.best .th{width:76px;height:100px}.cand .when{color:var(--text) !important;font-weight:700 !important}
+.wz-sub{margin:20px 0 8px;font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.alt-list{display:grid;gap:8px}
+.alt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:8px 10px 8px 6px;border-radius:16px;background:var(--card);border:1px solid var(--line);color:var(--text);animation:enter var(--d-med) var(--ease-decel) both;animation-delay:calc(var(--i,0)*60ms)}
+.alt .day{width:48px;display:grid;justify-items:center;flex:0 0 auto}.alt .day b{font-family:var(--font-display);font-size:22px;font-weight:800;line-height:1}.alt .day span{font:600 11px var(--font-mono,monospace);text-transform:uppercase;color:var(--muted)}
+.alt .tx{flex:1;min-width:0}.alt .tx b{display:block;font-size:15px;font-weight:700;line-height:1.25}.alt .tx small{display:block;font-size:12px;color:var(--muted);font-weight:600}
+.alt .mini{width:40px;height:52px;border-radius:8px;overflow:hidden;flex:0 0 auto;background-size:cover}.alt .mini img{width:100%;height:100%;object-fit:cover}
+.tips-h{display:flex;align-items:center;justify-content:space-between}
+.tips-x{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:var(--muted)}
+.wz-load{display:flex;align-items:center;gap:10px;margin:12px 2px 0;font-size:13px;font-weight:600;color:var(--muted)}
 .about{margin:var(--s2) 0 0;font-size:12px;color:var(--muted);font-weight:600;text-align:center}
 .hero .art{position:absolute;inset:-20% 0 0 0;z-index:-2}
 .hero .art img{width:100%;height:100%;object-fit:cover}
@@ -1284,8 +1295,8 @@ const EXAMPLES = [['konsert','Konsert i helgen','Berwaldhallen på lördag 19:00
 function renderExamples(){
   let wrap = $('#exWrap'); if (!wrap) { wrap = document.createElement('div'); wrap.id = 'exWrap'; $('#view-rutnat').insertBefore(wrap, $('#newWrap')); }
   const own = state.events.filter(e => !/^(ex|p)-/.test(e.id)).length;
-  if (state.loading || !state.canWrite || own >= 3) { wrap.innerHTML = ''; return; }
-  const h = `<div class="tips-h">Tips: prova att lägga till</div><div class="exrow">${EXAMPLES.map(([k,t,x]) => `<button type="button" class="excard pressable" data-ex="${esc(x)}" style="--c:${catOf(k).c}"><span class="exi">${svgIcon(k, 16)}</span><span><b>${t}</b><small>${esc(x)}</small></span></button>`).join('')}</div>`;
+  if (state.loading || !state.canWrite || own >= 10 || lsGet('bento.tips.off')) { wrap.innerHTML = ''; wrap.dataset.h = ''; return; }
+  const h = `<div class="tips-h">Tips: prova att lägga till<button type="button" class="tips-x pressable" id="tipsOff" aria-label="Dölj tipsen"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div class="exrow">${EXAMPLES.map(([k,t,x]) => `<button type="button" class="excard pressable" data-ex="${esc(x)}" style="--c:${catOf(k).c}"><span class="exi">${svgIcon(k, 16)}</span><span><b>${t}</b><small>${esc(x)}</small></span></button>`).join('')}</div>`;
   if (wrap.dataset.h !== h) { wrap.innerHTML = h; wrap.dataset.h = h; }
 }
 function renderGuest(){
@@ -1348,7 +1359,7 @@ function showEmpty(parent, on){
 }
 function renderTimeline(){
   const list = visible(), all = list.filter(e => !isPast(e)), past = list.filter(isPast).reverse();
-  const isOpen = e => { const k = kindOf(e); return !e.date || k === 'fran' || k === 'period'; };
+  const isOpen = e => { const k = kindOf(e); if (e.category === 'resa' && e.date) return false; return !e.date || k === 'fran' || k === 'period'; };
   const open = all.filter(isOpen), upcoming = all.filter(e => !isOpen(e));
   const tl = $('#tl'), bar = $('#monthChips').parentElement;
   if (!list.length) { tl.innerHTML = state.loading ? '<div class="skel" style="grid-template-columns:1fr;grid-auto-rows:96px"><i></i><i></i><i></i></div>' : ''; $('#monthChips').innerHTML=''; bar.style.display='none'; showEmpty(tl.parentElement, !state.loading); return; }
@@ -1413,7 +1424,8 @@ function makeClone(kind, src, box, radius){
   const inner = document.createElement('div'); inner.className = 'inner'; c.appendChild(inner);
   if (kind === 'card') {
     const ev = state.events.find(e => e.id === src.dataset.id);
-    if (ev) { const cat = catOf(ev.category); inner.innerHTML = artHTML(ev).replace(' loading="lazy"','') + `<span class="veil"></span><span class="pill" style="--pc:${cat.c}">${svgIcon(ev.category)}${cat.label}</span>`; }
+    const whole = src.classList.contains('card') || src.classList.contains('rail-item');
+    if (ev) { const cat = catOf(ev.category); inner.innerHTML = artHTML(ev).replace(' loading="lazy"','') + (whole ? `<span class="veil"></span><span class="pill" style="--pc:${cat.c}">${svgIcon(ev.category)}${cat.label}</span>` : '<span class="veil" style="opacity:0"></span>'); }
     else inner.style.background = 'var(--card)';
   } else inner.style.background = 'var(--primary)';
   Object.assign(c.style, { left: box.left+'px', top: box.top+'px', width: box.width+'px', height: box.height+'px', borderRadius: radius });
@@ -1428,9 +1440,28 @@ function flip(clone, from, to, radiusFrom, radiusTo, dur){
   inner.animate([{ transform: `scale(${1/sx}, ${1/sy})` }, { transform: 'none' }], opts);
   return clone.animate([{ transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`, borderRadius: radiusFrom }, { transform: 'none', borderRadius: radiusTo }], opts);
 }
-function showDlg(d){ d.show(); d.querySelector('.scroll').scrollTop = 0; requestAnimationFrame(() => d.classList.add('on')); }
+let popSkip = 0; const pushQ = [];
+function pushSheet(d){ if (popSkip > 0) { pushQ.push(d); return; } history.pushState({ bsheet: d.id }, ''); d._hist = true; }
+function topSheet(){ const open = [...document.querySelectorAll('dialog[open]')]; return open[open.length - 1] || null; }
+addEventListener('popstate', () => {
+  if (popSkip > 0) { popSkip--; if (!popSkip) while (pushQ.length) { const d = pushQ.shift(); if (d.open) pushSheet(d); } return; }
+  const d = topSheet(); if (!d) return;
+  d._hist = false;
+  if (d.id === 'editor' && !$('#quick').hidden && wz.stage !== 'start' && wz.stage !== 'thinking') { wz.back(); if (d.open) pushSheet(d); return; }
+  if (d.id === 'detail' && $('#dmenu').classList.contains('on')) { $('#dmenu').classList.remove('on'); pushSheet(d); return; }
+  closeSheet(d);
+});
+function showDlg(d){ d.show(); pushSheet(d); d.querySelector('.scroll').scrollTop = 0; requestAnimationFrame(() => d.classList.add('on')); }
+function morphSrc(el){
+  if (!el) return null;
+  if (el.classList.contains('card') || el.classList.contains('rail-item')) return el;
+  const th = el.querySelector('.thumb, .th');
+  if (th && th.querySelector('img, *') !== null && th.getBoundingClientRect().width > 0) return th;
+  return el.classList.contains('tl-item') && el.querySelector('img.thumb') ? el.querySelector('img.thumb') : null;
+}
 function openSheet(d, from, kind){
   if (d.open) return;
+  if (from && (kind || 'card') === 'card' && !from.closest('#filter')) { const ev = state.events.find(e => e.id === (from.dataset.id || from.closest('[data-id]')?.dataset.id)); from = morphSrc(from); if (from && ev) from.dataset.id = ev.id; } else if (from && from.closest('#filter')) from = null;
   d.classList.remove('closing','out','rise','prep','on');
   const canMorph = !!from && !reduced() && !document.querySelector('dialog[open]') && from.isConnected;
   d._from = canMorph ? from : null; d._kind = kind || 'card';
@@ -1441,7 +1472,7 @@ function openSheet(d, from, kind){
   if (phone && d._kind === 'card') { r1 = { left: 0, top: Math.round(innerHeight * 0.06), width: innerWidth, height: 300 }; radius1 = '24px'; }
   else if (phone && d.id === 'editor') { r1 = { left: 0, top: Math.round(innerHeight * 0.06), width: innerWidth, height: Math.round(innerHeight * 0.94) }; radius1 = '24px 24px 0px 0px'; }
   let clone, anim;
-  const go = () => { clone = makeClone(d._kind, from, r1, radius1); document.body.appendChild(clone); from.style.visibility = 'hidden'; anim = flip(clone, r0, r1, radius0, radius1, 300); };
+  const go = () => { clone = makeClone(d._kind, from, r1, radius1); if (d.id === 'detail') { const a = clone.querySelector('.art'); if (a) a.style.inset = '-20% 0 0 0'; } document.body.appendChild(clone); from.style.visibility = 'hidden'; anim = flip(clone, r0, r1, radius0, radius1, 300); };
   if (r1) { go(); d.classList.add('prep'); requestAnimationFrame(() => requestAnimationFrame(() => showDlg(d))); }
   else {
     d.classList.add('prep'); showDlg(d);
@@ -1457,7 +1488,7 @@ function closeSheet(d, instant){
   if (!d.open || d.classList.contains('closing')) return;
   if (instant || reduced()) { d.close(); return; }
   let target = d._from;
-  if (d.id === 'detail') target = document.querySelector(`#view-${state.view} .card[data-id="${currentId}"], #view-${state.view} .tl-item[data-id="${currentId}"]`);
+  if (d.id === 'detail') { const cands = [...document.querySelectorAll(`#view-${state.view} [data-id="${currentId}"]`)].map(morphSrc).filter(Boolean); target = cands.find(el => { const r = rectOf(el); return r.bottom > 60 && r.top < innerHeight - 60 && r.width > 0; }) || null; }
   const kind = d._kind || 'card';
   const src = kind === 'card' ? d.querySelector('.hero') : d.querySelector('.sheet');
   if (d._from && target && target.isConnected && src) {
@@ -1492,30 +1523,33 @@ function enableDrag(d){
   sheet.addEventListener('pointermove', move); sheet.addEventListener('pointerup', end); sheet.addEventListener('pointercancel', end);
 }
 
+document.querySelectorAll('dialog').forEach(d => d.addEventListener('close', () => { if (d._hist) { d._hist = false; popSkip++; history.back(); } }));
 /* ---------- Detail ---------- */
 let currentId = null;
 const TICKET_ICON = { vill: ic('<path d="M12 21s-7-4.5-7-10a7 7 0 0 1 14 0c0 5.5-7 10-7 10z"/>'), har: ic('<path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z"/><path d="M13 7v10"/>'), saknas: ic('<path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z"/><path d="M3 3l18 18"/>') };
 const TICKET_SHORT = { vill: 'Vill gå', har: 'Har biljett', saknas: 'Ingen biljett' };
+const TRIP_SHORT = { vill: 'Bara en idé', har: 'Bokad', saknas: 'Ska boka' };
+const tkLabel = (ev, k) => (ev.category === 'resa' ? TRIP_SHORT : TICKET_SHORT)[k];
 const linkify = t => esc(t).replace(/(https?:\/\/[^\s<]+)/g, u => `<a href="${u}" target="_blank" rel="noopener">${u.replace(/^https?:\/\//,'').slice(0,40)}</a>`);
 function detailHTML(ev){
   const c = catOf(ev.category), past = isPast(ev), d = ev.date ? daysUntil(ev.date) : 0, kind = kindOf(ev);
   const big = !ev.date ? `<div class="bigrow"><b style="font-size:28px">Datum?</b><span>${ev.endDate ? 'spelas till ' + nodot(fmtShort.format(parseISO(ev.endDate))) : 'inte bestämt än'}</span></div>`
     : past ? `<div class="bigrow"><b style="font-size:28px">${countdown(ev)}</b></div>`
     : d === 0 ? `<div class="bigrow"><b>Idag</b><span>${ev.time?`kl ${ev.time}`:''}</span></div>`
-    : `<div class="bigrow"><b>${String(d).split('').map((ch,i) => `<i style="--i:${i}">${ch}</i>`).join('')}</b><span>${kind === 'fran' ? (d===1?'dag till premiären':'dagar till premiären') : d===1?'dag kvar':'dagar kvar'}${ev.time?` · kl ${ev.time}`:''}</span></div>`;
+    : `<div class="bigrow"><b>${String(d).split('').map((ch,i) => `<i style="--i:${i}">${ch}</i>`).join('')}</b><span>${kind === 'fran' ? (d===1?'dag till premiären':'dagar till premiären') : d===1?'dag kvar':'dagar kvar'}${ev.category === 'resa' && ev.endDate && ev.endDate > ev.date ? ` · ${Math.round((parseISO(ev.endDate) - parseISO(ev.date)) / 864e5) + 1} dagar` : ''}${ev.time?` · kl ${ev.time}`:''}</span></div>`;
   const place = [ev.venue, ev.city].filter(Boolean).join(', ');
   const tk = ev.ticket || 'vill';
   const tiles = state.canWrite ? `<div class="tiles" style="--i:1">
-      <button type="button" class="tile pressable ${tk==='har'?'ok':tk==='saknas'?'warn':''}" id="tTicket" aria-label="Biljett: ${TICKET_SHORT[tk]}. Tryck för att ändra">${TICKET_ICON[tk]}<span>${TICKET_SHORT[tk]}</span></button>
+      <button type="button" class="tile pressable ${tk==='har'?'ok':tk==='saknas'?'warn':''}" id="tTicket" aria-label="${tkLabel(ev, tk)}. Tryck för att ändra">${TICKET_ICON[tk]}<span>${tkLabel(ev, tk)}</span></button>
       <button type="button" class="tile pressable ${ev.with?'on':''}" id="tWith" aria-label="Sällskap">${I.user}<span>${ev.with ? esc(ev.with) : 'Med vem?'}</span></button>
       ${state.mode === 'db' ? `<button type="button" class="tile claim pressable ${ev.claimBy?'on':''}" id="tClaim" aria-pressed="${!!ev.claimBy}">${I.check}<span>${ev.claimBy ? (ev.claimBy === state.me ? 'Du bokar' : esc(state.names[ev.claimBy] || 'Någon') + ' bokar') : 'Jag bokar'}</span></button>` : ''}
     </div>
     <div class="inline-in" id="withRow" hidden style="--i:2;margin:-6px 0 var(--s4)"><input id="withIn" placeholder="Vem går du med?" value="${esc(ev.with||'')}" maxlength="80" autocomplete="off"><button type="button" class="btn ghost pressable" id="withSave" style="flex:0 0 auto">Spara</button></div>`
-    : (ev.ticket || ev.with || ev.claimBy ? `<div class="tiles" style="--i:1">${ev.ticket && ev.ticket !== 'vill' ? `<span class="tile ${ev.ticket==='har'?'ok':'warn'}">${TICKET_ICON[ev.ticket]}<span>${TICKET_SHORT[ev.ticket]}</span></span>` : ''}${ev.with ? `<span class="tile on">${I.user}<span>${esc(ev.with)}</span></span>` : ''}${ev.claimBy ? `<span class="tile claim on">${I.check}<span>${ev.claimBy === state.me ? 'Du bokar' : esc(state.names[ev.claimBy] || 'Någon') + ' bokar'}</span></span>` : ''}</div>` : '');
+    : (ev.ticket || ev.with || ev.claimBy ? `<div class="tiles" style="--i:1">${ev.ticket && ev.ticket !== 'vill' ? `<span class="tile ${ev.ticket==='har'?'ok':'warn'}">${TICKET_ICON[ev.ticket]}<span>${tkLabel(ev, ev.ticket)}</span></span>` : ''}${ev.with ? `<span class="tile on">${I.user}<span>${esc(ev.with)}</span></span>` : ''}${ev.claimBy ? `<span class="tile claim on">${I.check}<span>${ev.claimBy === state.me ? 'Du bokar' : esc(state.names[ev.claimBy] || 'Någon') + ' bokar'}</span></span>` : ''}</div>` : '');
   const note = ev.note || ev.url ? `<p class="note-p" style="--i:3">${ev.note ? linkify(ev.note) : ''}${ev.url && !(ev.note||'').includes(ev.url) ? `${ev.note ? ' ' : ''}<a href="${esc(ev.url)}" target="_blank" rel="noopener">${esc(ev.url.replace(/^https?:\/\//,'').replace(/\/.*$/,''))}</a>` : ''}</p>` : '';
   const by = ev.by ? `<p class="note-p" style="--i:3;font-size:13px;color:var(--muted);font-weight:600">${byLabel(ev.by)}</p>` : '';
   const primary = !ev.date ? `<a class="btn primary pressable" href="https://www.google.com/search?q=${encodeURIComponent([ev.title, ev.venue || ev.city || '', 'datum biljetter'].filter(Boolean).join(' '))}" target="_blank" rel="noopener">${I.cal}Sök datum</a>`
-    : ev.url ? `<a class="btn primary pressable" href="${esc(ev.url)}" target="_blank" rel="noopener">${ic('<path d="M5 12h14M13 6l6 6-6 6"/>')}${ev.ticket === 'har' ? 'Öppna länken' : 'Köp biljett'}</a>`
+    : ev.url ? `<a class="btn primary pressable" href="${esc(ev.url)}" target="_blank" rel="noopener">${ic('<path d="M5 12h14M13 6l6 6-6 6"/>')}${ev.category === 'resa' ? 'Öppna bokningen' : ev.ticket === 'har' ? 'Öppna länken' : 'Köp biljett'}</a>`
     : `<a class="btn primary pressable" href="${gcalLink(ev)}" target="_blank" rel="noopener">${I.cal}Lägg i kalendern</a>`;
   const secondary = ev.date && ev.url ? `<a class="btn ghost pressable" href="${gcalLink(ev)}" target="_blank" rel="noopener" style="flex:0 0 auto">${I.cal}Kalender</a>` : `<button type="button" class="btn ghost pressable" id="copyCard" style="flex:0 0 auto">${I.copy}Kopiera</button>`;
   return `<div class="hero">${artHTML(ev)}<div class="hin"><span class="pill" style="--pc:${c.c}">${svgIcon(ev.category)}${c.label}</span><h3>${esc(ev.title)}</h3><div class="hsub">${esc(dateLine(ev))}${place ? ` · ${esc(place)}` : ''}</div></div></div>
@@ -1567,7 +1601,7 @@ const dayLabel = iso => nodot(fmtDay.format(parseISO(iso)));
 const wz = {
   stage: 'start', cands: [], step: 0, steps: [], timer: 0, reqId: 0,
   setStage(st){ this.stage = st; $('#quick').dataset.stage = st; $('#moreBtn').style.display = ''; },
-  reset(){ clearInterval(this.timer); if ($('#sugg')) $('#sugg').innerHTML = ''; this.reqId++; this.cands = []; this.step = 0; this.steps = []; $('#wz').innerHTML = ''; $('#wzq').innerHTML = ''; this.setStage('start'); },
+  reset(){ clearInterval(this.timer); this.loadingMore = false; if ($('#sugg')) $('#sugg').innerHTML = ''; this.reqId++; this.cands = []; this.step = 0; this.steps = []; $('#wz').innerHTML = ''; $('#wzq').innerHTML = ''; this.setStage('start'); },
   thinking(file, lines){
     clearInterval(this.timer); this.setStage('thinking');
     const ph = file ? `<div class="ph"><img src="${URL.createObjectURL(file)}" alt=""></div>` : `<span class="t-matrix" style="transform:scale(1.6);margin:18px">${[0,1,2,1,2,3,2,3,4].map(d => `<i style="--d:${d}"></i>`).join('')}</span>`;
@@ -1579,6 +1613,8 @@ const wz = {
     const text = $('#paste').value.trim();
     if (!seen) { applyQuick(); this.thinking(null); }
     const id = ++this.reqId; let cands = [];
+    const early = !!(seen && draft.title && CFG);
+    if (early) { clearInterval(this.timer); this.cands = [{ ...this.fromDraft(), match: true, why: 'Läst från din bild' }]; this.loadingMore = true; this.showPick(); }
     if (CFG && (text || seen)) {
       try {
         const sn = seen ? Object.fromEntries(['title','date','dateKind','endDate','time','venue','city','url','note'].map(k => [k, draft[k] || ''])) : null;
@@ -1586,18 +1622,38 @@ const wz = {
         if (r.ok) { const j = await r.json(); cands = (j.candidates || []).filter(c => c && c.title); }
       } catch {}
     }
-    if (id !== this.reqId) return; clearInterval(this.timer);
+    if (id !== this.reqId) return; clearInterval(this.timer); this.loadingMore = false;
+    if (early) { this.mergeLate(cands); return; }
     this.cands = cands;
     if (cands.length) this.showPick(); else this.ask();
+  },
+  fromDraft(){ return { title: draft.title, category: draft.category, venue: draft.venue, city: draft.city, date: draft.date, dateKind: draft.dateKind, endDate: draft.endDate, time: draft.time, url: draft.url, note: draft.note, dates: [], images: [] }; },
+  sameish(a, b){ const n = x => String(x || '').toLowerCase().replace(/[^a-z0-9åäö]+/g, ' ').trim(); a = n(a); b = n(b); return !!a && !!b && (a === b || a.includes(b) || b.includes(a)); },
+  mergeLate(found){
+    const own = this.cands[0]; const twin = found.find(c => this.sameish(c.title, own.title));
+    if (twin) { if (String(twin.title).length > String(own.title).length) own.title = twin.title; if (!own.time && twin.time) own.time = twin.time; own.images = twin.images || []; own.dates = twin.dates || []; if (!own.url) own.url = twin.url || ''; if (!own.venue) own.venue = twin.venue || ''; if (!own.city) own.city = twin.city || ''; if (!own.date && twin.date) { own.date = twin.date; own.dateKind = twin.dateKind; own.endDate = twin.endDate || ''; } own.why = twin.why || own.why; }
+    const others = found.filter(c => c !== twin).map(c => ({ ...c, match: false }));
+    if (this.stage === 'pick') { this.cands = [own, ...others]; this.showPick(); return; }
+    if ((this.stage === 'ask' || this.stage === 'done') && twin && this.sameish(draft.title, own.title)) {
+      draft._images = (own.images || []).filter(u => /^https:\/\//.test(u)); draft._dates = (own.dates || []).filter(d => d >= iso(new Date()));
+      if (!draft.url && own.url && draft.category !== 'resa') draft.url = own.url;
+      if (draft._images.length && !this.steps.includes('img')) { this.steps.splice(Math.min(this.step + 1, this.steps.length), 0, 'img'); if (this.stage === 'done') { this.setStage('ask'); this.step = this.steps.indexOf('img'); } this.renderQ(); }
+      fillForm(draft);
+    }
   },
   candDate(c){ const k = c.dateKind; if (!c.date) return c.endDate ? `spelas t.o.m. ${dayLabel(c.endDate)}` : 'datum inte satt'; return (k === 'fran' ? 'premiär ' : k === 'period' ? 'från ' : '') + dayLabel(c.date) + (c.time ? ` ${c.time}` : '') + (k === 'period' && c.endDate ? ` – ${dayLabel(c.endDate)}` : ''); },
   showPick(){
     this.setStage('pick');
     const own = draft._own && draft._own.image;
-    $('#wz').innerHTML = `<h3 class="wz-h">${this.cands.length > 1 ? 'Vilken är det?' : 'Är det den här?'}</h3><div class="cands">${this.cands.map((c, i) => {
-      const cc = catOf(c.category); const im = (c.images && c.images[0]) || own;
-      return `<button type="button" class="cand pressable" data-cand="${i}" style="--i:${i}"><span class="th" style="background-image:linear-gradient(135deg,${cc.g[0]},${cc.g[1]})">${im ? `<img src="${esc(im)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}</span><span class="tx"><b>${esc(c.title)}</b><span>${esc([c.venue, c.city].filter(Boolean).join(', ') || cc.label)}</span><span>${esc(this.candDate(c))}</span>${c.why ? `<em>${esc(c.why)}</em>` : ''}</span></button>`; }).join('')}
-      <button type="button" class="cand none pressable" data-cand="-1">Nej, inget av dem</button></div>`;
+    const idx = this.cands.map((c, i) => i);
+    let best = idx.filter(i => this.cands[i].match); if (!best.length) best = [0];
+    const rest = idx.filter(i => !best.includes(i));
+    const th = (c, cls) => { const cc = catOf(c.category); const im = (c.images && c.images[0]) || own; return `<span class="${cls}" style="background-image:linear-gradient(135deg,${cc.g[0]},${cc.g[1]})">${im ? `<img src="${esc(im)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}</span>`; };
+    const bestHTML = best.map((i, k) => { const c = this.cands[i]; return `<button type="button" class="cand best pressable" data-cand="${i}" style="--i:${k}">${th(c, 'th')}<span class="tx"><b>${esc(c.title)}</b><span>${esc([c.venue, c.city].filter(Boolean).join(', ') || catOf(c.category).label)}</span><span class="when">${esc(this.candDate(c))}</span>${c.why ? `<em>${esc(c.why)}</em>` : ''}</span></button>`; }).join('');
+    const restHTML = rest.length ? `<h4 class="wz-sub">Andra alternativ</h4><div class="alt-list">${rest.map((i, k) => { const c = this.cands[i]; const d = c.date ? parseISO(c.date) : null;
+      return `<button type="button" class="alt pressable" data-cand="${i}" style="--i:${k + best.length}"><span class="day">${d ? `<b>${d.getDate()}</b><span>${nodot(fmtWd.format(d))}</span>` : '<b>?</b>'}</span><span class="tx"><b>${esc(c.title)}</b><small>${esc([c.time, c.venue].filter(Boolean).join(' · ') || this.candDate(c))}</small></span>${th(c, 'mini')}</button>`; }).join('')}</div>` : '';
+    const more = this.loadingMore ? `<p class="wz-load"><span class="t-matrix">${[0,1,2,1,2,3,2,3,4].map(d => `<i style="--d:${d}"></i>`).join('')}</span>Letar originalbild och fler datum …</p>` : '';
+    $('#wz').innerHTML = `<h3 class="wz-h">${best.length > 1 ? 'Vilken är det?' : 'Är det den här?'}</h3><div class="cands">${bestHTML}</div>${more}${restHTML}<button type="button" class="cand none pressable" data-cand="-1">Inget av dem</button>`;
   },
   choose(i){
     const c = this.cands[i];
@@ -1606,6 +1662,7 @@ const wz = {
       Object.assign(draft, { title: c.title, category: CATS[c.category] ? c.category : draft.category, venue: c.venue || draft.venue || '', city: c.city || draft.city || '', date: c.date || '', dateKind: c.dateKind || (c.date ? 'exakt' : ''), endDate: c.endDate || '', time: c.time || draft.time || '', url: c.url || draft.url || '', note: c.note || draft.note || '' });
       draft._dates = (c.dates || []).filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d) && d >= iso(new Date()));
       draft._images = (c.images || []).filter(u => /^https:\/\//.test(u));
+      if (draft.category === 'resa') { if (/visit|tourism|turism|tripadvisor|wikipedia/i.test(draft.url)) draft.url = ''; if (draft.date && draft.endDate) draft.dateKind = 'exakt'; draft.note = ''; }
       if (!keepPhoto && draft._images[0]) this.useImage(draft._images[0]);
     }
     fillForm(draft); renderCatPick(); this.ask();
@@ -1631,16 +1688,17 @@ const wz = {
     }
     if (k === 'when') {
       const today = iso(new Date()); const opts = []; const kind = draft.dateKind;
-      if (draft.date && kind === 'fran') { opts.push([draft.date, `Premiären`, dayLabel(draft.date)]); opts.push(['__fran', 'Någon gång efter', '']); }
+      if (draft.category === 'resa' && draft.date && draft.endDate) { opts.push([draft.date, `${dayLabel(draft.date)} – ${dayLabel(draft.endDate)}`, '']); }
+      else if (draft.date && kind === 'fran') { opts.push([draft.date, `Premiären`, dayLabel(draft.date)]); opts.push(['__fran', 'Någon gång efter', '']); }
       else if (draft.date && kind === 'period') { opts.push(['__period', `Någon gång${draft.endDate ? ' före ' + dayLabel(draft.endDate) : ''}`, '']); if (draft.date >= today) opts.push([draft.date, dayLabel(draft.date), draft.time || '']); }
       else if (draft.date) opts.push([draft.date, dayLabel(draft.date), draft.time || '']);
       for (const d of (draft._dates || [])) if (d !== draft.date && opts.length < 7) opts.push([d, dayLabel(d), '']);
-      q = !draft.date && !(draft._dates || []).length ? 'Vet du när du vill gå?' : kind === 'fran' ? 'När vill du se den?' : (draft._dates || []).length > 1 ? 'Vilken dag?' : 'Stämmer dagen?';
+      q = draft.category === 'resa' ? (draft.date ? 'Stämmer datumen?' : 'När åker ni?') : !draft.date && !(draft._dates || []).length ? 'Vet du när du vill gå?' : kind === 'fran' ? 'När vill du se den?' : (draft._dates || []).length > 1 ? 'Vilken dag?' : 'Stämmer dagen?';
       body = `<div class="opts">${opts.map(([v, l, sm]) => `<button type="button" class="opt pressable" data-when="${v}">${esc(l)}${sm ? ` <small>${esc(sm)}</small>` : ''}</button>`).join('')}<button type="button" class="opt pressable" data-when="__pick">${I.cal}Välj dag</button><button type="button" class="opt pressable" data-when="__unknown">Vet inte än</button></div><div class="wz-in" id="wzDate" hidden><input type="date" id="wzDateIn" min="${today}" value="${draft.date && draft.date >= today ? draft.date : ''}"><input type="time" id="wzTimeIn" value="${draft.time || ''}" style="flex:0 0 120px"><button type="button" class="btn primary pressable" id="wzDateOk" style="flex:0 0 auto">OK</button></div>`;
     }
-    if (k === 'ticket') { q = 'Har du biljett?'; const t = draft.ticket || ''; body = `<div class="opts">${[['har','Ja, har biljett'],['saknas','Ska köpa'],['vill','Bara sugen']].map(([v, l]) => `<button type="button" class="opt pressable" data-tk="${v}" aria-pressed="${t === v}">${l}</button>`).join('')}</div>`; }
+    if (k === 'ticket') { const trip = draft.category === 'resa'; q = trip ? 'Är resan bokad?' : 'Har du biljett?'; const t = draft.ticket || ''; body = `<div class="opts">${(trip ? [['har','Ja, bokad'],['saknas','Ska boka'],['vill','Bara en idé']] : [['har','Ja, har biljett'],['saknas','Ska köpa'],['vill','Bara sugen']]).map(([v, l]) => `<button type="button" class="opt pressable" data-tk="${v}" aria-pressed="${t === v}">${l}</button>`).join('')}</div>`; }
     if (k === 'with') {
-      q = 'Med vem?'; const names = [...new Set(state.events.map(e => (e.with || '').trim()).filter(Boolean))].slice(0, 6);
+      q = draft.category === 'resa' ? 'Vem följer med?' : 'Med vem?'; const names = [...new Set(state.events.map(e => (e.with || '').trim()).filter(Boolean))].slice(0, 6);
       body = `<div class="opts">${names.map(n => `<button type="button" class="opt pressable" data-with="${esc(n)}" aria-pressed="${draft.with === n}">${esc(n)}</button>`).join('')}<button type="button" class="opt pressable" data-with="" aria-pressed="false">Själv</button></div><div class="wz-in"><input id="wzWithIn" maxlength="80" placeholder="${names.length ? 'Någon annan …' : 'Namn, t.ex. Maja och Sara'}" autocomplete="off"><button type="button" class="btn ghost pressable" id="wzWithOk" style="flex:0 0 auto">OK</button></div>`;
     }
     $('#wzq').innerHTML = `${dots}<h3 class="q">${q}</h3>${body}<button type="button" class="wz-skip" id="wzSkip">${this.step === this.steps.length - 1 ? 'Hoppa över' : 'Hoppa över'}</button>`;
@@ -1670,7 +1728,7 @@ const wz = {
       if (v === '__unknown') { if (!draft.date || draft.dateKind === 'exakt' || !draft.dateKind) { draft.date = ''; draft.dateKind = 'okant'; draft.noDate = true; } }
       else if (v === '__fran') { draft.dateKind = 'fran'; }
       else if (v === '__period') { draft.dateKind = 'period'; }
-      else { draft.date = v; draft.dateKind = 'exakt'; draft.endDate = ''; draft.noDate = false; }
+      else { draft.date = v; draft.dateKind = 'exakt'; if (draft.category !== 'resa' || v !== draft.date) draft.endDate = draft.category === 'resa' ? draft.endDate : ''; draft.noDate = false; }
       fillForm(draft); renderPreview(true); this.next(); return true;
     }
     if (t.id === 'wzDateOk') { const d = $('#wzDateIn').value; if (!d) { $('#wzDateIn').focus(); return true; } draft.date = d; draft.time = $('#wzTimeIn').value || draft.time || ''; draft.dateKind = 'exakt'; draft.endDate = ''; draft.noDate = false; fillForm(draft); renderPreview(true); this.next(); return true; }
@@ -1789,7 +1847,7 @@ async function setImage(file){
   const photo = /^image\/(jpeg|heic|heif)/i.test(file.type) || (res && res.confidence !== undefined && !/screenshot|skärm/i.test(res.note||''));
   const full = drawCrop(img, crop, 1400); if (photo) autoLevel(full);
   // Second pass on the cropped poster (sharper text), in parallel with QR reading of the whole photo
-  const weak = !res || !res.title || !res.date || (res.confidence !== undefined && res.confidence < 0.85);
+  const weak = !res || !res.title || (!res.date && !res.endDate);
   const again = weak && canRead() && crop.w * crop.h < 0.92 ? (scan('Läser igen, närmare …'), cvToBlob(full, 0.85).then(b => readPoster(b, true)).catch(() => null)) : Promise.resolve(null);
   const [res2, qr] = await Promise.all([again, readQR(img).catch(() => null)]); scan('');
   if (res2 && (res2.title || res2.date)) { const c1 = res && res.confidence || 0, c2 = res2.confidence || 0; res = res || {}; for (const k of ['title','date','dateKind','endDate','time','venue','city','category','url','note']) { if (res2[k] && (!res[k] || c2 >= c1)) res[k] = res2[k]; } res.confidence = Math.max(c1, c2); }
@@ -2009,6 +2067,7 @@ document.addEventListener('click', e => {
   else if (t.id === 'otherEmail') { lsSet(LS_LOGIN_EMAIL, null); renderAcct(); setTimeout(() => $('#loginEmail')?.focus(), 60); }
   else if (t.id === 'signOut') supa.signOut();
   else if (t.id === 'acctBtn') openAcct(t);
+  else if (t.id === 'tipsOff') { lsSet('bento.tips.off', true); renderExamples(); }
   else if (t.id === 'codeToggle') { const r = $('#codeRow'); r.hidden = !r.hidden; t.setAttribute('aria-expanded', String(!r.hidden)); if (!r.hidden) $('#loginCode').focus(); }
   else if (t.id === 'nameEdit') { $('#nameRow').hidden = false; $('#nameView').hidden = true; $('#nameIn').focus(); }
   else if (t.id === 'nameOk') { const n = $('#nameIn').value.trim(); if (!n) return; t.disabled = true; supa.setName(n).then(() => { renderAcct(); supaUI(); render(); toast('Namnet är sparat'); }).catch(() => { t.disabled = false; toast('Gick inte att spara'); }); }
