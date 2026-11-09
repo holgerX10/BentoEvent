@@ -98,7 +98,7 @@ svg{display:block}
 @keyframes textswap{from{opacity:0;translate:0 4px}to{opacity:1;translate:0 0}}
 .spacer{flex:1}
 .text-btn{flex:0 0 auto;height:36px;padding:0 12px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
-.sub{max-width:1100px;margin:0 auto;padding:0 var(--s4)}
+.topbar .sub{max-width:1100px;margin:0 auto;padding:0 var(--s4)}
 .chips{display:flex;gap:var(--s2);overflow-x:auto;scroll-snap-type:x proximity;padding:0 2px 10px;scrollbar-width:none;mask-image:linear-gradient(90deg,#000 94%,transparent)}
 .chips::-webkit-scrollbar{display:none}
 .chip{position:relative;scroll-snap-align:start;flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
@@ -338,6 +338,79 @@ dialog.out .sheet{animation:none !important;opacity:0;transition:opacity 150ms v
 .login-box .code-in.err{border:2px solid var(--danger)}
 .login-msg{color:var(--muted);font-weight:600;min-height:1em}
 .login-links{display:flex;justify-content:space-between}
+#quick[data-stage="start"] #preview,#quick[data-stage="thinking"] #preview,#quick[data-stage="pick"] #preview{display:none}
+#quick:not([data-stage="start"]) #wzStart{display:none}
+#quick[data-stage="pick"] #moreBtn,#quick[data-stage="thinking"] #moreBtn{display:none}
+#editor:has(#quick[data-stage="start"]) .sheet-foot,#editor:has(#quick[data-stage="thinking"]) .sheet-foot,#editor:has(#quick[data-stage="pick"]) .sheet-foot{display:none}
+#editor:has(#quick[hidden]) .sheet-foot{display:flex}
+.snap{display:flex;align-items:center;gap:16px;width:100%;min-height:132px;padding:20px;border-radius:var(--r-l);background:var(--primary);color:var(--primary-ink);text-align:left;box-shadow:0 12px 28px -14px rgba(90,46,28,.55)}
+.snap-ic{width:64px;height:64px;border-radius:20px;background:rgba(255,255,255,.55);display:grid;place-items:center;flex:0 0 auto}
+.snap-tx b{display:block;font-family:var(--font-display);font-size:20px;font-weight:800;letter-spacing:-.01em;line-height:1.15}
+.snap-tx small{display:block;margin-top:4px;font-size:14px;font-weight:600;opacity:.75}
+.ask-box{position:relative;margin-top:var(--s3)}
+.ask-box textarea{width:100%;min-height:56px;max-height:160px;resize:none;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:var(--r);padding:16px 56px 16px 16px;font:500 16px/1.4 var(--font-body);field-sizing:content}
+.ask-box textarea:focus{outline:none;border-color:var(--secondary);box-shadow:0 0 0 3px color-mix(in srgb,var(--secondary) 30%,transparent)}
+.ask-go{position:absolute;right:8px;bottom:8px;width:40px;height:40px;border-radius:12px;background:var(--text);color:var(--surface);display:grid;place-items:center}
+.wz-hint{margin:10px 2px 0;font-size:13px;color:var(--muted);font-weight:600;line-height:1.5}
+.ex-q{color:var(--text);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px;font-weight:700}
+.wz:empty,.wzq:empty{display:none}
+.wz-think{display:grid;justify-items:center;gap:14px;padding:28px 8px 12px;text-align:center}
+.wz-think .ph{width:120px;height:160px;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-lg);position:relative}
+.wz-think .ph img{width:100%;height:100%;object-fit:cover}
+.wz-think .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 0,rgba(255,255,255,.55) 50%,transparent 100%);background-size:100% 220%;animation:sweep 1.6s var(--ease-out) infinite}
+@keyframes sweep{from{background-position:0 120%}to{background-position:0 -120%}}
+.wz-think b{font-family:var(--font-display);font-size:19px;font-weight:700}
+.wz-think small{font-size:14px;color:var(--muted);font-weight:600;min-height:1.4em;animation:enter var(--d-med) var(--ease-decel)}
+.wz-h{font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:-.01em;margin:4px 0 12px}
+.cands{display:grid;gap:10px}
+.cand{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:10px;border-radius:var(--r);border:1px solid var(--line);background:var(--card);color:var(--text);animation:enter var(--d-med) var(--ease-decel) both;animation-delay:calc(var(--i,0)*70ms)}
+.cand .th{width:64px;height:84px;border-radius:12px;overflow:hidden;flex:0 0 auto;background-size:cover;background-position:center}
+.cand .th img{width:100%;height:100%;object-fit:cover}
+.cand .tx{flex:1;min-width:0;display:grid;gap:3px}
+.cand b{font-family:var(--font-display);font-size:17px;font-weight:700;line-height:1.2}
+.cand span{font-size:13px;color:var(--muted);font-weight:600}
+.cand em{font-style:normal;font-size:12px;color:var(--secondary);font-weight:700}
+.cand.none{justify-content:center;min-height:52px;font-weight:700;color:var(--muted);background:transparent;border-style:dashed}
+#quick[data-stage="ask"] #preview,#quick[data-stage="done"] #preview{height:170px}
+.wzq{margin-top:var(--s4);animation:enter var(--d-med) var(--ease-decel)}
+.wzq .dots{display:flex;gap:6px;margin-bottom:10px}.wzq .dots i{width:18px;height:4px;border-radius:2px;background:var(--line)}.wzq .dots i.on{background:var(--text)}
+.wzq .q{font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:-.01em;margin:0 0 12px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{min-height:48px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:15px;font-weight:700;display:inline-flex;align-items:center;gap:8px}
+.opt[aria-pressed="true"]{background:var(--text);color:var(--surface);border-color:var(--text)}
+.opt small{font-weight:600;opacity:.7}
+.imgs{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 6px;scroll-snap-type:x mandatory}
+.imgo{flex:0 0 auto;width:104px;height:138px;border-radius:14px;overflow:hidden;border:3px solid transparent;position:relative;scroll-snap-align:start;background:var(--card-2)}
+.imgo img{width:100%;height:100%;object-fit:cover}
+.imgo[aria-pressed="true"]{border-color:var(--text)}
+.imgo span{position:absolute;left:6px;bottom:6px;font-size:11px;font-weight:700;background:rgba(0,0,0,.6);color:#fff;padding:3px 7px;border-radius:999px}
+.imgo.flat{display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff}
+.wz-skip{margin-top:12px;font-size:14px;font-weight:700;color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+.wz-in{display:flex;gap:8px;margin-top:10px}.wz-in input{flex:1;min-width:0;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:12px;padding:12px;font-size:16px}
+.wz-done{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--success);font-size:15px}
+.fres-list{display:grid;gap:6px;margin:4px 0 8px}.fres-list:empty{display:none}
+.fres{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:8px;border-radius:14px;background:var(--card);border:1px solid var(--line);color:var(--text);animation:enter var(--d-short,160ms) var(--ease-decel) both}
+.fres .th{width:44px;height:44px;border-radius:10px;overflow:hidden;flex:0 0 auto;display:grid;place-items:center;color:#fff}
+.fres .th img{width:100%;height:100%;object-fit:cover}
+.fres .tx{min-width:0}.fres b{display:block;font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fres small{display:block;font-size:12px;color:var(--muted);font-weight:600}
+.fres-none{margin:4px 2px 8px;color:var(--muted);font-weight:600;font-size:14px}
+.acct-btn{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:1px solid var(--line);color:var(--muted);flex:0 0 auto;margin-left:8px;order:2}
+.acct-btn.in{background:var(--secondary);border-color:transparent;color:#fff}
+.acct-btn b{font-family:var(--font-display);font-size:15px;font-weight:800}
+.ac-hero{display:grid;justify-items:center;gap:8px;text-align:center;padding:4px 0 16px}
+.ac-hero p{margin:0;color:var(--muted);font-weight:600;font-size:14px;line-height:1.45;max-width:34ch}
+.ac-hero h3{margin:0;font-family:var(--font-display);font-size:22px;font-weight:800}
+.ac-name{display:flex;align-items:center;gap:10px}
+.ac-av{display:grid;place-items:center;border-radius:50%;background:var(--secondary);color:#fff;font-family:var(--font-display);font-weight:800;flex:0 0 auto}
+.ac-av.big{width:72px;height:72px;font-size:30px}.ac-av.big svg{width:30px;height:30px}.ac-av.big.danger{background:var(--danger)}
+.ac-av.sm{width:32px;height:32px;font-size:14px}
+.ac-people{display:grid;gap:8px}
+.ac-person{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px}.ac-person small{color:var(--muted);font-weight:600}
+.ac-tag{margin-left:auto;font-size:11px !important;text-transform:uppercase;letter-spacing:.06em}
+.ac-in{width:100%;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:12px;padding:14px;font-size:16px}
+.row-btn.danger,.row-btn.danger .tx b{color:var(--danger)}.row-btn.danger .ic{background:color-mix(in srgb,var(--danger) 14%,transparent);color:var(--danger)}
+.btn.danger{background:var(--danger);color:#fff}
+input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none}
 .about{margin:var(--s2) 0 0;font-size:12px;color:var(--muted);font-weight:600;text-align:center}
 .hero .art{position:absolute;inset:-20% 0 0 0;z-index:-2}
 .hero .art img{width:100%;height:100%;object-fit:cover}
@@ -591,6 +664,7 @@ html[data-vt="card"]::view-transition-old(root),html[data-vt="card"]::view-trans
   <div class="row">
     <div class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>Bento<span class="count" id="count"></span></div>
     <div class="spacer"></div>
+    <button type="button" class="acct-btn pressable" id="acctBtn" aria-label="Konto" hidden><span id="acctAv"></span></button>
     <span class="filt-pill" id="filtPill" hidden><span id="filtTxt"></span><button type="button" id="filtClear" aria-label="Rensa sök och filter"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>
   </div>
   <div class="sub">
@@ -665,14 +739,22 @@ html[data-vt="card"]::view-transition-old(root),html[data-vt="card"]::view-trans
     <div class="sheet-h"><h2 id="mnTitle">Mer</h2><button type="button" class="close pressable" data-close aria-label="Stäng"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="scroll" style="gap:12px">
       <div class="rows">
-        <button type="button" class="row-btn pressable" id="mRnd"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.4" fill="currentColor" stroke="none"/><circle cx="16" cy="8" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="8" cy="16" r="1.4" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="1.4" fill="currentColor" stroke="none"/></svg></span><span class="tx"><b>Slumpa</b><small>Låt Bento välja något kommande</small></span></button>
         <button type="button" class="row-btn pressable" id="mShare"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></span><span class="tx"><b>Dela</b><small>Länk, text, kort på din sajt, backup</small></span></button>
       </div>
-      <div id="accountRow" hidden></div>
       <div class="lbl">Utseende</div>
       <div class="seg" id="themeSeg"><button type="button" data-theme="auto">Auto</button><button type="button" data-theme="light">Ljust</button><button type="button" data-theme="dark">Mörkt</button></div>
       <p class="about" id="about"></p>
     </div>
+  </div>
+</dialog>
+
+<!-- Konto -->
+<dialog id="acct" aria-labelledby="acTitle">
+  <div class="scrim" aria-hidden="true"></div>
+  <div class="sheet">
+    <div class="grab" aria-hidden="true"></div>
+    <div class="sheet-h"><h2 id="acTitle">Konto</h2><button type="button" class="close pressable" data-close aria-label="Stäng"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="scroll" id="acctBody"></div>
   </div>
 </dialog>
 
@@ -704,14 +786,19 @@ html[data-vt="card"]::view-transition-old(root),html[data-vt="card"]::view-trans
     <div class="sheet-h"><h2 id="eTitle">Nytt kort</h2><button type="button" class="close pressable" data-close aria-label="Stäng"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="scroll">
       <form class="f" id="form" novalidate>
-        <div class="quick" id="quick">
-          <div class="paste"><textarea id="paste" rows="3" placeholder="Klistra in länk eller skriv: Dramaten 12 dec 19:30" aria-label="Snabbinmatning"></textarea>
-            <div class="paste-acts"><button type="button" class="mini pressable" id="pasteBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg>Klistra in</button><button type="button" class="mini primary pressable" id="pickImg"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg>Fota</button><input id="f-img" type="file" accept="image/*" tabindex="-1"></div>
+        <div class="quick" id="quick" data-stage="start">
+          <div class="wz-start" id="wzStart">
+            <button type="button" class="snap pressable" id="pickImg"><span class="snap-ic"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.2l1.3-2h6l1.3 2h1.2A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg></span><span class="snap-tx"><b>Fota affisch eller biljett</b><small>eller välj en skärmbild</small></span></button>
+            <div class="ask-box"><textarea id="paste" rows="1" placeholder="…eller skriv vad det är" aria-label="Skriv vad det är" enterkeyhint="search"></textarea><button type="button" class="ask-go pressable" id="findBtn" aria-label="Hitta" hidden><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
+            <p class="wz-hint">Till exempel <button type="button" class="ex-q" data-q="Tove Lo Avicii Arena">Tove Lo Avicii Arena</button>, <button type="button" class="ex-q" data-q="Dramaten i december">Dramaten i december</button> eller en länk</p>
+            <input id="f-img" type="file" accept="image/*" tabindex="-1">
           </div>
           <div class="scan" id="scan" hidden></div>
+          <div class="wz" id="wz"></div>
           <div class="preview" id="preview"></div>
           <div class="catpick" id="catPick" hidden></div>
           <div class="need-row" id="needRow" hidden></div>
+          <div class="wzq" id="wzq"></div>
           <button type="button" class="link-btn" id="moreBtn" aria-expanded="false"><span id="moreLbl">Fyll i själv</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
         </div>
         <div class="more" id="more"><div>
@@ -999,8 +1086,9 @@ const supa = {
     if (local.length) { let n = 0; for (const ev of local) { try { await supa.save({ ...ev, by: state.me }); n++; } catch {} } if (n === local.length) lsSet(LS_LOCAL, []); if (n) toast(`${n} kort flyttade till ditt konto`); }
     supa.chan = SUPA.channel('events-' + supa.list.id).on('postgres_changes', { event: '*', schema: 'public', table: 'events', filter: 'list_id=eq.' + supa.list.id }, p => supa.onChange(p)).subscribe();
     supa.booting = false; updateBanner(); render(); supaUI();
+    if (!state.names[state.me] || state.names[state.me] === (state.user.email || '').split('@')[0]) { const m = (supa.members || []).find(x => x.user_id === state.me); if (m && m.display_name) state.names[state.me] = m.display_name; supaUI(); }
   },
-  async loadMembers(){ const { data } = await SUPA.from('list_members').select('user_id, display_name').eq('list_id', supa.list.id); (data || []).forEach(m => { if (m.display_name) state.names[m.user_id] = m.display_name; else if (!(m.user_id in state.names)) state.names[m.user_id] = ''; }); },
+  async loadMembers(){ const { data } = await SUPA.from('list_members').select('user_id, display_name, role, joined_at').eq('list_id', supa.list.id).order('joined_at'); supa.members = data || []; (data || []).forEach(m => { if (m.display_name) state.names[m.user_id] = m.display_name; else if (!(m.user_id in state.names)) state.names[m.user_id] = ''; }); },
   async load(){ const { data, error } = await SUPA.from('events').select('*').eq('list_id', supa.list.id); if (error) toast('Kunde inte hämta listan'); state.events = (data || []).map(supa.rowToEv); state.loading = false; lsSet(LS_CACHE, state.events); render(); },
   onChange(p){
     if (p.eventType === 'DELETE') state.events = state.events.filter(e => e.id !== p.old.id);
@@ -1013,6 +1101,8 @@ const supa = {
   async upload(blob, id){ const path = `${supa.list.id}/${id}-${Date.now()}.jpg`; const { error } = await SUPA.storage.from('posters').upload(path, blob, { contentType: 'image/jpeg', upsert: true }); if (error) throw error; return SUPA.storage.from('posters').getPublicUrl(path).data.publicUrl; },
   async signIn(email){ const { error } = await SUPA.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname, shouldCreateUser: true } }); if (error) throw error; },
   async verify(email, code){ const { error } = await SUPA.auth.verifyOtp({ email, token: code, type: 'email' }); if (error) throw error; lsSet(LS_LOGIN_EMAIL, null); location.reload(); },
+  async setName(n){ const { error } = await SUPA.from('list_members').update({ display_name: n }).eq('user_id', state.me); if (error) throw error; await SUPA.auth.updateUser({ data: { name: n } }); state.names[state.me] = n; await supa.loadMembers(); },
+  async deleteAccount(){ const { error } = await SUPA.rpc('delete_account'); if (error) throw error; await SUPA.auth.signOut(); localStorage.clear(); location.replace(location.pathname); },
   async signOut(){ await SUPA.auth.signOut(); lsSet(LS_CACHE, []); location.reload(); },
   async switchList(id){ lsSet(LS_LIST, id); location.reload(); },
   inviteUrl(){ return supa.list ? `${location.origin}${location.pathname}?join=${supa.list.invite_code}` : ''; },
@@ -1023,20 +1113,53 @@ async function peek(url){
   if (!CFG || !url) return null; if (peeked.has(url)) return peeked.get(url);
   try { const r = await fetch('/api/peek?url=' + encodeURIComponent(url), { signal: AbortSignal.timeout(8000) }); if (!r.ok) throw 0; const j = await r.json(); peeked.set(url, j); return j; } catch { peeked.set(url, null); return null; }
 }
+const PERSON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
+let deferredInstall = null; addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; });
+function initials(n){ return (n || '?').trim().charAt(0).toUpperCase() || '?'; }
 function supaUI(){
-  const acc = $('#accountRow'); if (!acc) return;
-  if (!SUPA) { acc.hidden = true; return; }
-  acc.hidden = false;
-  if (state.me) {
-    const lists = supa.lists.length > 1 ? `<div class="lbl">Lista</div><div class="chipset">${supa.lists.map(l => `<button type="button" class="pressable" data-list="${l.id}" aria-pressed="${l.id === supa.list.id}">${esc(l.name)}</button>`).join('')}</div>` : '';
-    acc.innerHTML = `<div class="lbl">Konto</div><div class="row-btn" style="cursor:default"><span class="av">${esc((state.names[state.me] || '?').charAt(0).toUpperCase())}</span><span class="tx"><b>${esc(state.names[state.me] || 'Du')}</b><small>${esc(state.user.email || '')} · ${esc(supa.list.name)}</small></span><button type="button" class="text-btn pressable" id="signOut">Logga ut</button></div>${lists}`;
-  } else {
-    const sent = lsGet(LS_LOGIN_EMAIL);
-    const standalone = matchMedia('(display-mode: standalone)').matches;
-    acc.innerHTML = sent ? `<div class="lbl">Konto</div><div class="rows"><div class="row-btn login-box"><span class="tx"><b>Kolla mejlen</b><small>${standalone ? 'Skriv koden vi skickade till' : 'Tryck på länken, eller skriv koden vi skickade till'} <b>${esc(sent)}</b>. Koden fungerar på vilken enhet som helst.</small></span><input id="loginCode" class="code-in" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="8" placeholder="Kod" aria-label="Kod från mejlet"><button type="button" class="btn primary pressable" id="codeBtn">Logga in</button><small id="loginMsg" class="login-msg"></small><span class="login-links"><button type="button" class="text-btn pressable" id="resendBtn">Skicka igen</button><button type="button" class="text-btn pressable" id="otherEmail">Annan e-post</button></span></div></div>`
-      : `<div class="lbl">Konto</div><div class="rows"><div class="row-btn login-box"><span class="tx"><b>Logga in med e-post</b><small>Då följer korten med mellan dator och mobil och kan delas. Inget lösenord, du får en kod.</small></span><div class="inline-in"><input id="loginEmail" type="email" inputmode="email" autocomplete="email" placeholder="namn@mejl.se"><button type="button" class="btn primary pressable" id="loginBtn" style="flex:0 0 auto">Skicka kod</button></div><small id="loginMsg" class="login-msg"></small></div></div>`;
-  }
+  const btn = $('#acctBtn'); if (!btn) return;
+  if (!SUPA) { btn.hidden = true; return; }
+  btn.hidden = false;
+  $('#acctAv').innerHTML = state.me ? `<b>${esc(initials(state.names[state.me]))}</b>` : PERSON;
+  btn.classList.toggle('in', !!state.me);
+  if ($('#acct').open) renderAcct();
 }
+function renderAcct(confirmDel){
+  const el = $('#acctBody'); const standalone = matchMedia('(display-mode: standalone)').matches;
+  const install = !standalone && deferredInstall ? `<button type="button" class="row-btn pressable" id="installBtn"><span class="ic">${ic('<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>')}</span><span class="tx"><b>Lägg på hemskärmen</b><small>Öppnas som en app och syns i dela-menyn</small></span></button>` : '';
+  if (!state.me) {
+    const sent = lsGet(LS_LOGIN_EMAIL);
+    el.innerHTML = `<div class="ac-hero"><span class="ac-av big">${PERSON}</span><p>Logga in så följer korten med mellan dator och mobil, och du kan dela en lista med andra.</p></div>
+      ${sent ? `<div class="login-box row-btn"><span class="tx"><b>Kolla mejlen</b><small>Vi har skickat en inloggningslänk till <b>${esc(sent)}</b>. Öppna den på enheten du vill logga in på.</small></span>
+        <button type="button" class="link-btn" id="codeToggle" aria-expanded="false" style="justify-self:start;padding:0">Har du en kod?</button>
+        <div id="codeRow" hidden style="display:grid;gap:10px"><input id="loginCode" class="code-in" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="8" placeholder="Kod" aria-label="Kod från mejlet"><button type="button" class="btn primary pressable" id="codeBtn">Logga in</button></div>
+        <small id="loginMsg" class="login-msg"></small><span class="login-links"><button type="button" class="text-btn pressable" id="resendBtn">Skicka igen</button><button type="button" class="text-btn pressable" id="otherEmail">Annan e-post</button></span></div>`
+      : `<div class="login-box row-btn"><span class="tx"><b>Logga in med e-post</b><small>Inget lösenord. Du får en länk i mejlet.</small></span><input id="loginEmail" class="ac-in" type="email" inputmode="email" autocomplete="email" placeholder="namn@mejl.se"><button type="button" class="btn primary pressable" id="loginBtn">Skicka inloggningslänk</button><small id="loginMsg" class="login-msg"></small></div>`}
+      ${install ? `<div class="rows" style="margin-top:12px">${install}</div>` : ''}`;
+    return;
+  }
+  const me = state.names[state.me] || '';
+  if (confirmDel) {
+    el.innerHTML = `<div class="ac-hero"><span class="ac-av big danger">${I.trash}</span><h3>Ta bort kontot?</h3><p>Inloggningen raderas. Listor du delar med andra går över till dem. Listor bara du har raderas med alla kort. Det går inte att ångra.</p></div>
+      <div class="sheet-foot"><button type="button" class="btn ghost pressable" id="delAcctNo">Avbryt</button><button type="button" class="btn danger pressable" id="delAcctYes">Ta bort kontot</button></div>`;
+    return;
+  }
+  const people = (supa.members || []).map(m => `<div class="ac-person"><span class="ac-av sm">${esc(initials(m.display_name || '?'))}</span><span>${esc(m.display_name || 'Utan namn')}${m.user_id === state.me ? ' <small>(du)</small>' : ''}</span>${m.role === 'owner' ? '<small class="ac-tag">ägare</small>' : ''}</div>`).join('');
+  const lists = supa.lists.length > 1 ? `<div class="lbl">Listor</div><div class="chipset">${supa.lists.map(l => `<button type="button" class="pressable" data-list="${l.id}" aria-pressed="${l.id === supa.list.id}">${esc(l.name)}</button>`).join('')}</div>` : '';
+  el.innerHTML = `<div class="ac-hero"><span class="ac-av big">${esc(initials(me))}</span><div class="ac-name" id="nameView"><h3>${esc(me || 'Utan namn')}</h3><button type="button" class="text-btn pressable" id="nameEdit">Byt namn</button></div>
+      <div class="wz-in" id="nameRow" hidden style="width:100%"><input id="nameIn" maxlength="40" value="${esc(me)}" placeholder="Ditt namn"><button type="button" class="btn primary pressable" id="nameOk" style="flex:0 0 auto">Spara</button></div><p>${esc(state.user.email || '')}</p></div>
+    <div class="lbl">${esc(supa.list.name)} · ${(supa.members || []).length} ${(supa.members || []).length === 1 ? 'person' : 'personer'}</div>
+    <div class="ac-people">${people}</div>
+    <div class="rows" style="margin-top:12px">
+      <button type="button" class="row-btn pressable" id="inviteBtn"><span class="ic">${ic('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>')}</span><span class="tx"><b>Bjud in</b><small>Skicka en länk. Den som öppnar den kan lägga till kort.</small></span></button>
+      ${install}
+    </div>${lists}
+    <div class="rows" style="margin-top:12px">
+      <button type="button" class="row-btn pressable" id="signOut"><span class="ic">${ic('<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/>')}</span><span class="tx"><b>Logga ut</b><small>Korten finns kvar i kontot</small></span></button>
+      <button type="button" class="row-btn pressable danger" id="delAcct"><span class="ic">${I.trash}</span><span class="tx"><b>Ta bort kontot</b></span></button>
+    </div>`;
+}
+function openAcct(fromEl){ renderAcct(); openSheet($('#acct'), fromEl, 'fab'); }
 const store = {
   async init(){
     const cached = lsGet(LS_CACHE) || lsGet(LS_LOCAL) || [];
@@ -1108,6 +1231,7 @@ function render(){
   if (state.sel) renderSel();
 }
 function renderRndTile(){
+  $('#rndWrap').innerHTML = ''; return;
   const wrap = $('#rndWrap'); const any = state.events.some(e => e.date && !isPast(e) && !state.hidden.has(e.id));
   if (!any || state.loading) { wrap.innerHTML = ''; wrap.dataset.h = ''; return; }
   const save = rndWin; let win = 'helg', n = 0;
@@ -1195,7 +1319,7 @@ function showEmpty(parent, on){
     e = document.createElement('div'); e.className = 'empty';
     const filtered = state.filter !== 'alla' || state.q;
     e.innerHTML = filtered ? `<h3>Inget matchar</h3><button type="button" class="btn ghost pressable" id="clearFilter">Visa alla</button>`
-      : `<h3>Inget här än</h3>${state.canWrite?`<button type="button" class="btn primary pressable" data-new>Klistra in något kul</button>`:''}`;
+      : `<h3>Inget här än</h3>${state.canWrite?`<button type="button" class="btn primary pressable" data-new>Lägg till något kul</button>`:''}`;
     parent.appendChild(e);
   } else if (!on && e) e.remove();
 }
@@ -1403,13 +1527,137 @@ function openEditor(ev, fromEl){
   draft = ev ? { ...ev } : { id: uid(), category: 'annat', size: 's' }; parsed = {}; draft.noDate = false; draft.imageBlob = null; scan('');
   $('#eTitle').textContent = ev ? 'Redigera' : 'Nytt kort';
   $('#saveBtn').textContent = 'Spara';
-  $('#paste').value = ''; $('#paste').classList.remove('hit');
-  $('#quick').hidden = !!ev; setMore(!!ev); $('#catPick').hidden = true;
+  $('#paste').value = ''; $('#paste').classList.remove('hit'); $('#findBtn').hidden = true;
+  $('#quick').hidden = !!ev; setMore(!!ev); $('#catPick').hidden = true; wz.reset();
   fillForm(draft); renderCatPick(); renderSizePick(); renderImgPrev(); renderPreview();
   document.querySelectorAll('.err').forEach(e => e.classList.remove('on'));
   openSheet($('#editor'), fromEl, 'fab');
-  if (!ev) setTimeout(() => { if (matchMedia('(min-width:640px)').matches) $('#paste').focus(); }, 420);
 }
+
+/* ---------- Lägg till: Fota/skriv → AI hittar → frågor → spara ---------- */
+const fmtDay = new Intl.DateTimeFormat('sv-SE', { weekday: 'short', day: 'numeric', month: 'short' });
+const dayLabel = iso => nodot(fmtDay.format(parseISO(iso)));
+const wz = {
+  stage: 'start', cands: [], step: 0, steps: [], timer: 0, reqId: 0,
+  setStage(st){ this.stage = st; $('#quick').dataset.stage = st; },
+  reset(){ clearInterval(this.timer); this.reqId++; this.cands = []; this.step = 0; this.steps = []; $('#wz').innerHTML = ''; $('#wzq').innerHTML = ''; this.setStage('start'); },
+  thinking(file, lines){
+    clearInterval(this.timer); this.setStage('thinking');
+    const ph = file ? `<div class="ph"><img src="${URL.createObjectURL(file)}" alt=""></div>` : `<span class="t-matrix" style="transform:scale(1.6);margin:18px">${[0,1,2,1,2,3,2,3,4].map(d => `<i style="--d:${d}"></i>`).join('')}</span>`;
+    const L = lines || (file ? ['Läser affischen …', 'Letar efter datum och plats …', 'Söker originalaffischen …', 'Kollar biljettsidor …'] : ['Söker …', 'Letar efter datum och plats …', 'Hittar bilder …', 'Nästan klart …']);
+    $('#wz').innerHTML = `<div class="wz-think">${ph}<b>${file ? 'Kollar vad det är' : 'Letar upp det'}</b><small id="wzLine">${L[0]}</small><button type="button" class="wz-skip" id="wzManual">Fyll i själv i stället</button></div>`;
+    let i = 0; this.timer = setInterval(() => { i = Math.min(i + 1, L.length - 1); const el = $('#wzLine'); if (el) { el.textContent = L[i]; el.style.animation = 'none'; void el.offsetWidth; el.style.animation = ''; } }, 2600);
+  },
+  async find(seen){
+    const text = $('#paste').value.trim();
+    if (!seen) { applyQuick(); this.thinking(null); }
+    const id = ++this.reqId; let cands = [];
+    if (CFG && (text || seen)) {
+      try {
+        const sn = seen ? Object.fromEntries(['title','date','dateKind','endDate','time','venue','city','url','note'].map(k => [k, draft[k] || ''])) : null;
+        const r = await fetch('/api/suggest', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text, seen: sn, today: iso(new Date()) }), signal: AbortSignal.timeout(55000) });
+        if (r.ok) { const j = await r.json(); cands = (j.candidates || []).filter(c => c && c.title); }
+      } catch {}
+    }
+    if (id !== this.reqId) return; clearInterval(this.timer);
+    this.cands = cands;
+    if (cands.length) this.showPick(); else this.ask();
+  },
+  candDate(c){ const k = c.dateKind; if (!c.date) return c.endDate ? `spelas t.o.m. ${dayLabel(c.endDate)}` : 'datum inte satt'; return (k === 'fran' ? 'premiär ' : k === 'period' ? 'från ' : '') + dayLabel(c.date) + (c.time ? ` ${c.time}` : '') + (k === 'period' && c.endDate ? ` – ${dayLabel(c.endDate)}` : ''); },
+  showPick(){
+    this.setStage('pick');
+    const own = draft._own && draft._own.image;
+    $('#wz').innerHTML = `<h3 class="wz-h">${this.cands.length > 1 ? 'Vilken är det?' : 'Är det den här?'}</h3><div class="cands">${this.cands.map((c, i) => {
+      const cc = catOf(c.category); const im = (c.images && c.images[0]) || own;
+      return `<button type="button" class="cand pressable" data-cand="${i}" style="--i:${i}"><span class="th" style="background-image:linear-gradient(135deg,${cc.g[0]},${cc.g[1]})">${im ? `<img src="${esc(im)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}</span><span class="tx"><b>${esc(c.title)}</b><span>${esc([c.venue, c.city].filter(Boolean).join(', ') || cc.label)}</span><span>${esc(this.candDate(c))}</span>${c.why ? `<em>${esc(c.why)}</em>` : ''}</span></button>`; }).join('')}
+      <button type="button" class="cand none pressable" data-cand="-1">Nej, inget av dem</button></div>`;
+  },
+  choose(i){
+    const c = this.cands[i];
+    if (c) {
+      const keepPhoto = draft._own;
+      Object.assign(draft, { title: c.title, category: CATS[c.category] ? c.category : draft.category, venue: c.venue || draft.venue || '', city: c.city || draft.city || '', date: c.date || '', dateKind: c.dateKind || (c.date ? 'exakt' : ''), endDate: c.endDate || '', time: c.time || draft.time || '', url: c.url || draft.url || '', note: c.note || draft.note || '' });
+      draft._dates = (c.dates || []).filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d) && d >= iso(new Date()));
+      draft._images = (c.images || []).filter(u => /^https:\/\//.test(u));
+      if (!keepPhoto && draft._images[0]) this.useImage(draft._images[0]);
+    }
+    fillForm(draft); renderCatPick(); this.ask();
+  },
+  ask(){
+    const st = [];
+    if (!draft.title) st.push('what');
+    if ((draft._images || []).length) st.push('img');
+    st.push('when', 'ticket', 'with');
+    this.steps = st; this.step = 0; this.setStage('ask'); $('#wz').innerHTML = ''; renderPreview(true); this.renderQ();
+  },
+  next(){ this.step++; if (this.step >= this.steps.length) { this.setStage('done'); $('#wzq').innerHTML = `<p class="wz-done">${I.check}Klart. Spara, eller ändra något ovan.</p>`; return; } this.renderQ(); },
+  back(){ if (this.step > 0) { this.step--; this.renderQ(); } else if (this.cands.length) this.showPick(); else this.reset(); },
+  renderQ(){
+    const k = this.steps[this.step]; const dots = `<div class="dots">${this.steps.map((_, i) => `<i class="${i <= this.step ? 'on' : ''}"></i>`).join('')}</div>`;
+    let q = '', body = '';
+    if (k === 'what') { q = 'Vad heter det?'; body = `<div class="wz-in"><input id="wzWhat" maxlength="90" placeholder="Till exempel Tove Lo" value="${esc(draft.title || '')}"><button type="button" class="btn primary pressable" id="wzWhatOk" style="flex:0 0 auto">OK</button></div>`; }
+    if (k === 'img') {
+      q = 'Vilken bild?'; const own = draft._own && draft._own.image; const cur = draft._imgPick || (own ? 'own' : '0');
+      body = `<div class="imgs">${own ? `<button type="button" class="imgo pressable" data-img="own" aria-pressed="${cur === 'own'}"><img src="${own}" alt=""><span>Ditt foto</span></button>` : ''}${draft._images.map((u, i) => `<button type="button" class="imgo pressable" data-img="${i}" aria-pressed="${cur === String(i)}"><img src="${esc(u)}" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"><span>Original</span></button>`).join('')}<button type="button" class="imgo flat pressable" data-img="none" aria-pressed="${cur === 'none'}" style="background:linear-gradient(135deg,${catOf(draft.category).g[0]},${catOf(draft.category).g[1]})">Ingen bild</button></div>`;
+    }
+    if (k === 'when') {
+      const today = iso(new Date()); const opts = []; const kind = draft.dateKind;
+      if (draft.date && kind === 'fran') { opts.push([draft.date, `Premiären`, dayLabel(draft.date)]); opts.push(['__fran', 'Någon gång efter', '']); }
+      else if (draft.date && kind === 'period') { opts.push(['__period', `Någon gång${draft.endDate ? ' före ' + dayLabel(draft.endDate) : ''}`, '']); if (draft.date >= today) opts.push([draft.date, dayLabel(draft.date), draft.time || '']); }
+      else if (draft.date) opts.push([draft.date, dayLabel(draft.date), draft.time || '']);
+      for (const d of (draft._dates || [])) if (d !== draft.date && opts.length < 7) opts.push([d, dayLabel(d), '']);
+      q = !draft.date && !(draft._dates || []).length ? 'Vet du när du vill gå?' : kind === 'fran' ? 'När vill du se den?' : (draft._dates || []).length > 1 ? 'Vilken dag?' : 'Stämmer dagen?';
+      body = `<div class="opts">${opts.map(([v, l, sm]) => `<button type="button" class="opt pressable" data-when="${v}">${esc(l)}${sm ? ` <small>${esc(sm)}</small>` : ''}</button>`).join('')}<button type="button" class="opt pressable" data-when="__pick">${I.cal}Välj dag</button><button type="button" class="opt pressable" data-when="__unknown">Vet inte än</button></div><div class="wz-in" id="wzDate" hidden><input type="date" id="wzDateIn" min="${today}" value="${draft.date && draft.date >= today ? draft.date : ''}"><input type="time" id="wzTimeIn" value="${draft.time || ''}" style="flex:0 0 120px"><button type="button" class="btn primary pressable" id="wzDateOk" style="flex:0 0 auto">OK</button></div>`;
+    }
+    if (k === 'ticket') { q = 'Har du biljett?'; const t = draft.ticket || ''; body = `<div class="opts">${[['har','Ja, har biljett'],['saknas','Ska köpa'],['vill','Bara sugen']].map(([v, l]) => `<button type="button" class="opt pressable" data-tk="${v}" aria-pressed="${t === v}">${l}</button>`).join('')}</div>`; }
+    if (k === 'with') {
+      q = 'Med vem?'; const names = [...new Set(state.events.map(e => (e.with || '').trim()).filter(Boolean))].slice(0, 6);
+      body = `<div class="opts">${names.map(n => `<button type="button" class="opt pressable" data-with="${esc(n)}" aria-pressed="${draft.with === n}">${esc(n)}</button>`).join('')}<button type="button" class="opt pressable" data-with="" aria-pressed="false">Själv</button></div><div class="wz-in"><input id="wzWithIn" maxlength="80" placeholder="${names.length ? 'Någon annan …' : 'Namn, t.ex. Maja och Sara'}" autocomplete="off"><button type="button" class="btn ghost pressable" id="wzWithOk" style="flex:0 0 auto">OK</button></div>`;
+    }
+    $('#wzq').innerHTML = `${dots}<h3 class="q">${q}</h3>${body}<button type="button" class="wz-skip" id="wzSkip">${this.step === this.steps.length - 1 ? 'Hoppa över' : 'Hoppa över'}</button>`;
+    $('#wzq').style.animation = 'none'; void $('#wzq').offsetWidth; $('#wzq').style.animation = '';
+  },
+  async useImage(u){
+    draft._imgPick = String(draft._images.indexOf(u)); draft.image = u; draft.imageBlob = null; renderPreview(true);
+    if (!CFG) return;
+    try {
+      const r = await fetch('/api/img?url=' + encodeURIComponent(u), { signal: AbortSignal.timeout(10000) }); if (!r.ok) throw 0;
+      const { img, url } = await loadImg(await r.blob()); const full = drawCrop(img, null, 1400); URL.revokeObjectURL(url);
+      if (draft.image !== u) return; draft.image = cvToDataUrl(drawCrop(full, null, 900)); draft.imageBlob = await cvToBlob(full, 0.86); renderImgPrev(); renderPreview();
+    } catch {}
+  },
+  click(t){
+    if (t.dataset.cand !== undefined) { this.choose(+t.dataset.cand); return true; }
+    if (t.dataset.img !== undefined) {
+      const v = t.dataset.img; draft._imgPick = v;
+      if (v === 'own') { draft.image = draft._own.image; draft.imageBlob = draft._own.blob; renderPreview(true); }
+      else if (v === 'none') { draft.image = ''; draft.imageBlob = null; renderPreview(true); }
+      else this.useImage(draft._images[+v]);
+      renderImgPrev(); setTimeout(() => this.next(), 260); return true;
+    }
+    if (t.dataset.when !== undefined) {
+      const v = t.dataset.when;
+      if (v === '__pick') { $('#wzDate').hidden = false; $('#wzDateIn').focus(); try { $('#wzDateIn').showPicker(); } catch {} return true; }
+      if (v === '__unknown') { if (!draft.date || draft.dateKind === 'exakt' || !draft.dateKind) { draft.date = ''; draft.dateKind = 'okant'; draft.noDate = true; } }
+      else if (v === '__fran') { draft.dateKind = 'fran'; }
+      else if (v === '__period') { draft.dateKind = 'period'; }
+      else { draft.date = v; draft.dateKind = 'exakt'; draft.endDate = ''; draft.noDate = false; }
+      fillForm(draft); renderPreview(true); this.next(); return true;
+    }
+    if (t.id === 'wzDateOk') { const d = $('#wzDateIn').value; if (!d) { $('#wzDateIn').focus(); return true; } draft.date = d; draft.time = $('#wzTimeIn').value || draft.time || ''; draft.dateKind = 'exakt'; draft.endDate = ''; draft.noDate = false; fillForm(draft); renderPreview(true); this.next(); return true; }
+    if (t.dataset.tk) { draft.ticket = t.dataset.tk; renderPreview(); this.next(); return true; }
+    if (t.dataset.with !== undefined) { draft.with = t.dataset.with; this.next(); return true; }
+    if (t.id === 'wzWithOk') { draft.with = $('#wzWithIn').value.trim(); this.next(); return true; }
+    if (t.id === 'wzWhatOk') { const v = $('#wzWhat').value.trim(); if (!v) return true; draft.title = v; fillForm(draft); renderPreview(true); this.next(); return true; }
+    if (t.id === 'wzSkip') { if (this.steps[this.step] === 'when' && !draft.date) draft.noDate = true; this.next(); return true; }
+    if (t.id === 'wzManual') { this.reqId++; clearInterval(this.timer); this.setStage('ask'); this.steps = ['when', 'ticket', 'with']; this.step = 0; $('#wz').innerHTML = ''; renderPreview(); setMore(true); this.renderQ(); return true; }
+    if (t.id === 'findBtn') { this.find(); return true; }
+    if (t.classList.contains('ex-q')) { $('#paste').value = t.dataset.q; $('#findBtn').hidden = false; this.find(); return true; }
+    return false;
+  },
+};
+document.addEventListener('keydown', e => { if (e.key !== 'Enter') return; if (e.target.id === 'wzWithIn') { e.preventDefault(); $('#wzWithOk').click(); } if (e.target.id === 'wzWhat') { e.preventDefault(); $('#wzWhatOk').click(); } });
+
 function setMore(open){ $('#more').classList.toggle('open', open); $('#moreBtn').setAttribute('aria-expanded', String(open)); $('#moreLbl').textContent = open ? 'Dölj fält' : 'Fyll i själv'; }
 function fillForm(d){ $('#f-title').value = d.title||''; $('#f-date').value = d.date||''; $('#f-time').value = d.time||''; $('#f-end').value = d.endDate||''; $('#f-venue').value = d.venue||''; $('#f-city').value = d.city||''; $('#f-url').value = d.url||''; $('#f-note').value = d.note||''; }
 function readForm(){ draft.title = $('#f-title').value.trim(); draft.date = $('#f-date').value; draft.time = $('#f-time').value; draft.endDate = $('#f-end').value; draft.venue = $('#f-venue').value.trim(); draft.city = $('#f-city').value.trim(); draft.url = $('#f-url').value.trim(); draft.note = $('#f-note').value.trim(); }
@@ -1431,7 +1679,7 @@ function renderPreview(bump){
   if (bump && !reduced()) { pv.classList.remove('bump'); void pv.offsetWidth; pv.classList.add('bump'); }
   const need = $('#needRow'); const txt = $('#paste').value.trim() || has(d.image);
   const needs = []; if (txt && !has(d.title)) needs.push('title'); if (txt && !has(d.date) && has(d.title)) needs.push('date');
-  need.hidden = !needs.length;
+  need.hidden = true; needs.length = 0;
   need.innerHTML = needs.map(k => k === 'title' ? `<div class="field"><label for="n-title">Bara en sak saknas: vad gäller det?</label><input id="n-title" maxlength="90" autocomplete="off" value="${esc(d.title||'')}"></div>` : `<div class="field"><label for="n-date">${d.endDate ? `Spelas till ${esc(nodot(fmtShort.format(parseISO(d.endDate))))}. Vilken dag går ni?` : 'Bara en sak saknas: datum'}</label><div style="display:flex;gap:8px"><input id="n-date" type="date" value="${esc(d.date||'')}" style="flex:1"><button type="button" class="btn ghost pressable" id="noDate" style="flex:0 0 auto">Vet inte än</button></div></div>`).join('');
 }
 function renderCatPick(){ $('#catPick').innerHTML = Object.entries(CATS).map(([k,c]) => `<button type="button" class="pressable" data-cat="${k}" style="--c:${c.c}" aria-pressed="${draft.category===k}">${svgIcon(k,14)}${c.label}</button>`).join(''); }
@@ -1488,6 +1736,7 @@ Regler: title = evenemangets namn (artist, film, föreställning), inte tagline.
   } catch { return null; }
 }
 async function setImage(file){
+  const inWz = !$('#quick').hidden; if (inWz) wz.thinking(file);
   let src;
   try { src = await loadImg(file); } catch { toast('Bilden gick inte att läsa'); return; }
   const { img, url } = src;
@@ -1515,9 +1764,10 @@ async function setImage(file){
     if (res.category && CATS[res.category]) draft.category = res.category;
     if (res.dateKind && ['exakt','fran','period','okant'].includes(res.dateKind)) draft.dateKind = res.dateKind;
     fillForm(draft); renderCatPick(); $('#paste').classList.toggle('hit', !!(draft.title && draft.date));
-    if (!draft.date) toast(draft.endDate ? 'Hittade bara ett slutdatum' : 'Hittade inget datum'); else if (qr) toast('Läste QR-koden');
+    if (qr && draft.url === qr) toast('Läste QR-koden');
   } else if (!$('#paste').value.trim() && !draft.title) { const nm = file.name.replace(/\.\w+$/,'').replace(/[-_]+/g,' ').trim(); if (/[a-zåäö]{3,}\s+[a-zåäö]{2,}/i.test(nm) && !/^(img|pxl|dsc|screenshot|skärmbild|image)\b/i.test(nm) && !/^[0-9a-f]{6,}/i.test(nm)) { draft.title = nm; fillForm(draft); } }
   renderImgPrev(); renderPreview(true);
+  if (inWz) { draft._own = { image: draft.image, blob: draft.imageBlob }; wz.find(res || {}); }
 }
 async function submitForm(e){
   e.preventDefault();
@@ -1525,6 +1775,7 @@ async function submitForm(e){
   if ($('#n-title')) draft.title = $('#n-title').value.trim() || draft.title;
   if ($('#n-date')) draft.date = $('#n-date').value || draft.date;
   const err = $('#err-save'); err.classList.remove('on');
+  if ($('#quick').dataset.stage !== 'start' && !$('#quick').hidden && !draft.date) draft.noDate = true;
   if (!draft.title || (!draft.date && !draft.noDate)) { err.textContent = !draft.title ? 'Skriv vad det gäller.' : 'Välj datum, eller spara utan.'; err.classList.add('on'); if (!$('#quick').hidden) renderPreview(); else setMore(true); return; }
   const ev = { id: draft.id, title: draft.title, category: draft.category || 'annat', date: draft.date || '', time: draft.time || '', endDate: draft.endDate || '', venue: draft.venue || '', city: draft.city || '', url: draft.url || '', note: draft.note || '', size: draft.size || 's', image: draft.image || '', by: draft.by || state.me || '', dateKind: draft.dateKind || '', ticket: draft.ticket || '', with: draft.with || '', claimBy: draft.claimBy || '', createdAt: draft.createdAt || new Date().toISOString(), updatedAt: new Date().toISOString() };
   if (ev.date && ev.endDate && ev.endDate < ev.date) ev.endDate = '';
@@ -1583,7 +1834,7 @@ function renderRnd(pick){
 }
 
 /* ---------- Filter och sortering ---------- */
-function openFilter(fromEl){ renderFilter(); openSheet($('#filter'), fromEl, 'fab'); if (!state.events.length) return; setTimeout(() => { if (matchMedia('(min-width:640px)').matches) $('#q')?.focus({ preventScroll: true }); }, 420); }
+function openFilter(fromEl){ renderFilter(); renderFindRes(); openSheet($('#filter'), fromEl, 'fab'); if (!state.events.length) return; setTimeout(() => { if (matchMedia('(min-width:640px)').matches) $('#q')?.focus({ preventScroll: true }); }, 420); }
 function renderFilter(){
   const cities = [...new Set(state.events.map(e => (e.city||'').trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b,'sv'));
   const people = [...new Set(state.events.map(e => e.by).filter(Boolean))];
@@ -1591,6 +1842,7 @@ function renderFilter(){
   const qv = state.q;
   $('#filterBody').innerHTML = `
     <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input type="search" id="q" placeholder="Sök titel, plats, anteckning" aria-label="Sök bland korten" autocomplete="off" enterkeyhint="search" value="${esc(qv)}"><button type="button" id="qClear" aria-label="Rensa" ${qv ? '' : 'hidden'}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></label>
+    <div class="fres-list" id="findRes"></div>
     <div class="lbl">Sortera</div>
     <div class="seg">${[['datum','Datum'],['ny','Nytillagt'],['az','A–Ö']].map(([k,l]) => `<button type="button" data-sort="${k}" aria-pressed="${state.sort===k}">${l}</button>`).join('')}</div>
     <div class="lbl">Kategori</div>
@@ -1663,11 +1915,17 @@ async function importJson(file){
 }
 
 /* ---------- Search ---------- */
-let qT; document.addEventListener('input', e => { if (e.target.id !== 'q') return; clearTimeout(qT); const v = e.target.value; $('#qClear').hidden = !v; qT = setTimeout(() => { state.q = v; refilter(); const n = visible().length; const b = $('#filter .sheet-foot .primary'); if (b) b.textContent = `Visa ${n} kort`; }, 120); });
+let qT; document.addEventListener('input', e => { if (e.target.id !== 'q') return; clearTimeout(qT); const v = e.target.value; $('#qClear').hidden = !v; qT = setTimeout(() => { state.q = v; render(); renderFindRes(); const n = visible().length; const b = $('#filter .sheet-foot .primary'); if (b) b.textContent = `Visa ${n} kort`; }, 100); });
+function renderFindRes(){
+  const el = $('#findRes'); if (!el) return; const q = state.q.trim();
+  if (!q) { el.innerHTML = ''; return; }
+  const list = visible().slice(0, 8);
+  el.innerHTML = list.length ? list.map(ev => { const c = catOf(ev.category); return `<button type="button" class="fres pressable" data-open="${ev.id}"><span class="th" style="background:linear-gradient(135deg,${c.g[0]},${c.g[1]})">${okImg(ev.image) ? `<img src="${ev.image}" alt="" onerror="this.remove()">` : svgIcon(ev.category, 18)}</span><span class="tx"><b>${esc(ev.title)}</b><small>${esc(shortDate(ev))}${ev.venue ? ' · ' + esc(ev.venue) : ''}</small></span></button>`; }).join('') : `<p class="fres-none">Inget kort matchar ”${esc(q)}”.</p>`;
+}
 /* ---------- Mer ---------- */
 const LS_THEME = 'bento.theme';
 function setTheme(v){ if (v === 'auto' || !v) { html.removeAttribute('data-theme'); } else html.dataset.theme = v; lsSet(LS_THEME, v || 'auto'); document.querySelectorAll('#themeSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.theme === (v || 'auto')))); }
-function openMenu(fromEl){ setTheme(lsGet(LS_THEME) || 'auto'); supaUI(); $('#about').textContent = `Bento · ${state.events.length} kort · ${state.mode === 'db' ? 'delad lista' : 'sparas i den här webbläsaren'}`; openSheet($('#menu'), fromEl, 'fab'); }
+function openMenu(fromEl){ setTheme(lsGet(LS_THEME) || 'auto'); $('#about').textContent = `Bento · ${state.events.length} kort · ${state.mode === 'db' ? 'delad lista' : 'sparas i den här webbläsaren'}`; openSheet($('#menu'), fromEl, 'fab'); }
 
 /* ---------- Toast ---------- */
 let toastT, toastOnAct = null;
@@ -1680,9 +1938,11 @@ function toast(msg, opts={}){
 
 /* ---------- Events ---------- */
 document.addEventListener('click', e => {
+  { const t0 = e.target.closest('button'); if (t0 && t0.closest('#quick') && wz.click(t0)) return; }
   const pop = $('#dmenu'); if (pop.classList.contains('on') && !e.target.closest('#moreDots')) { pop.classList.remove('on'); $('#moreDots').setAttribute('aria-expanded','false'); }
   const t = e.target.closest('button, a, label'); if (!t) return;
   if (t.dataset.view) setView(t.dataset.view);
+  else if (t.dataset.open && t.closest('#filter')) { const id = t.dataset.open; closeSheet($('#filter'), true); setTimeout(() => openDetail(id), 80); }
   else if (t.dataset.open) { if (t.dataset.lp) { delete t.dataset.lp; return; } if (state.sel) toggleSel(t.dataset.open); else openDetail(t.dataset.open, t); }
   else if (t.dataset.cat !== undefined && t.closest('#catChips')) { if (state.filter !== t.dataset.cat) { state.filter = t.dataset.cat; refilter(); } }
   else if (t.dataset.cat !== undefined && t.closest('#catPick')) { draft.category = t.dataset.cat; renderCatPick(); renderPreview(true); $('#catPick').hidden = true; }
@@ -1701,11 +1961,20 @@ document.addEventListener('click', e => {
   else if (t.id === 'mRnd') { closeSheet($('#menu'), true); setTimeout(() => openRnd(), 60); }
   else if (t.id === 'mShare') { closeSheet($('#menu'), true); setTimeout(() => openShare(), 60); }
   else if (t.dataset.theme) setTheme(t.dataset.theme);
-  else if (t.id === 'gLogin') { openMenu(t); setTimeout(() => $('#loginEmail')?.focus(), 450); }
-  else if (t.id === 'loginBtn' || t.id === 'resendBtn') { const em = t.id === 'resendBtn' ? lsGet(LS_LOGIN_EMAIL) : ($('#loginEmail').value || '').trim().toLowerCase(); const msg = $('#loginMsg'); if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em || '')) { msg.textContent = 'Skriv en giltig e-postadress.'; return; } t.disabled = true; msg.textContent = 'Skickar …'; supa.signIn(em).then(() => { lsSet(LS_LOGIN_EMAIL, em); supaUI(); setTimeout(() => $('#loginCode')?.focus(), 60); if (t.id === 'resendBtn') $('#loginMsg').textContent = 'Nytt mejl skickat.'; }).catch(e => { t.disabled = false; msg.textContent = /rate|seconds/i.test(e.message||'') ? 'Vänta en minut innan du ber om ett nytt mejl.' : 'Gick inte. Försök igen.'; }); }
+  else if (t.id === 'gLogin') { openAcct(t); setTimeout(() => $('#loginEmail')?.focus(), 450); }
+  else if (t.id === 'loginBtn' || t.id === 'resendBtn') { const em = t.id === 'resendBtn' ? lsGet(LS_LOGIN_EMAIL) : ($('#loginEmail').value || '').trim().toLowerCase(); const msg = $('#loginMsg'); if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em || '')) { msg.textContent = 'Skriv en giltig e-postadress.'; return; } t.disabled = true; msg.textContent = 'Skickar …'; supa.signIn(em).then(() => { lsSet(LS_LOGIN_EMAIL, em); renderAcct(); if (t.id === 'resendBtn') $('#loginMsg').textContent = 'Nytt mejl skickat.'; }).catch(e => { t.disabled = false; msg.textContent = /rate|seconds/i.test(e.message||'') ? 'Vänta en minut innan du ber om ett nytt mejl.' : 'Gick inte. Försök igen.'; }); }
   else if (t.id === 'codeBtn') { const code = ($('#loginCode').value || '').replace(/\D/g, ''); const msg = $('#loginMsg'); if (code.length < 6) { msg.textContent = 'Koden har 6 siffror.'; $('#loginCode').classList.add('err'); return; } t.disabled = true; msg.textContent = 'Loggar in …'; supa.verify(lsGet(LS_LOGIN_EMAIL), code).catch(() => { t.disabled = false; $('#loginCode').classList.add('err'); msg.textContent = 'Fel eller gammal kod. Be om en ny om den är äldre än en timme.'; }); }
-  else if (t.id === 'otherEmail') { lsSet(LS_LOGIN_EMAIL, null); supaUI(); setTimeout(() => $('#loginEmail')?.focus(), 60); }
+  else if (t.id === 'otherEmail') { lsSet(LS_LOGIN_EMAIL, null); renderAcct(); setTimeout(() => $('#loginEmail')?.focus(), 60); }
   else if (t.id === 'signOut') supa.signOut();
+  else if (t.id === 'acctBtn') openAcct(t);
+  else if (t.id === 'codeToggle') { const r = $('#codeRow'); r.hidden = !r.hidden; t.setAttribute('aria-expanded', String(!r.hidden)); if (!r.hidden) $('#loginCode').focus(); }
+  else if (t.id === 'nameEdit') { $('#nameRow').hidden = false; $('#nameView').hidden = true; $('#nameIn').focus(); }
+  else if (t.id === 'nameOk') { const n = $('#nameIn').value.trim(); if (!n) return; t.disabled = true; supa.setName(n).then(() => { renderAcct(); supaUI(); render(); toast('Namnet är sparat'); }).catch(() => { t.disabled = false; toast('Gick inte att spara'); }); }
+  else if (t.id === 'inviteBtn') { const u = supa.inviteUrl(); if (navigator.share) navigator.share({ title: 'Bento', text: `Häng med i ${supa.list.name} på Bento`, url: u }).catch(() => {}); else navigator.clipboard.writeText(u).then(() => toast('Länken är kopierad')).catch(() => toast(u)); }
+  else if (t.id === 'installBtn') { if (deferredInstall) { deferredInstall.prompt(); deferredInstall.userChoice.finally(() => { deferredInstall = null; renderAcct(); }); } }
+  else if (t.id === 'delAcct') renderAcct(true);
+  else if (t.id === 'delAcctNo') renderAcct();
+  else if (t.id === 'delAcctYes') { t.disabled = true; t.textContent = 'Tar bort …'; supa.deleteAccount().catch(() => { t.disabled = false; t.textContent = 'Ta bort kontot'; toast('Gick inte. Försök igen.'); }); }
   else if (t.dataset.list) supa.switchList(t.dataset.list);
   else if (t.id === 'moreDots') { const on = !$('#dmenu').classList.contains('on'); $('#dmenu').classList.toggle('on', on); t.setAttribute('aria-expanded', String(on)); }
   else if (t.id === 'pasteBtn') { (navigator.clipboard && navigator.clipboard.readText ? navigator.clipboard.readText() : Promise.reject()).then(txt => { if (txt && txt.trim()) { $('#paste').value = txt.trim(); applyQuick(); } else toast('Urklippet är tomt'); }).catch(() => { $('#paste').focus(); toast('Håll inne i rutan och välj Klistra in'); }); }
@@ -1754,7 +2023,8 @@ $('#form').addEventListener('submit', submitForm);
 document.addEventListener('input', e => { if (e.target.id === 'loginCode') { e.target.classList.remove('err'); const v = e.target.value.replace(/\D/g, ''); if (v !== e.target.value) e.target.value = v; if (v.length === 6 && !e.target.dataset.auto) { e.target.dataset.auto = '1'; $('#codeBtn').click(); setTimeout(() => { delete e.target.dataset.auto; }, 1500); } } });
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'loginEmail') { e.preventDefault(); $('#loginBtn').click(); } if (e.key === 'Enter' && e.target.id === 'loginCode') { e.preventDefault(); $('#codeBtn').click(); } });
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'withIn') { e.preventDefault(); patchEvent(currentId, { with: e.target.value.trim() }); } });
-let pT; $('#paste').addEventListener('input', () => { clearTimeout(pT); pT = setTimeout(applyQuick, 90); });
+let pT; $('#paste').addEventListener('input', () => { $('#findBtn').hidden = !$('#paste').value.trim(); clearTimeout(pT); pT = setTimeout(applyQuick, 90); });
+$('#paste').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if ($('#paste').value.trim()) wz.find(); } });
 $('#paste').addEventListener('paste', e => { const f = [...(e.clipboardData?.files || [])].find(x => x.type.startsWith('image/')); if (f) { e.preventDefault(); setImage(f); } });
 $('#form').addEventListener('input', e => { if (e.target.closest('#more') || e.target.closest('#needRow')) { readForm(); if ($('#n-title')) draft.title = $('#n-title').value.trim(); if ($('#n-date')) draft.date = $('#n-date').value; if (e.target.id === 'f-title' || e.target.id === 'f-date' || e.target.id === 'f-venue') renderPreview(); } });
 $('#f-img').addEventListener('change', e => { picking = false; const f = e.target.files && e.target.files[0]; if (f) setImage(f); e.target.value = ''; });
@@ -1790,7 +2060,7 @@ new ResizeObserver(measure).observe(topbar); measure();
 /* ---------- Boot ---------- */
 setTheme(lsGet(LS_THEME) || 'auto');
 const qs = new URLSearchParams(location.search);
-if (qs.get('join')) { lsSet(LS_JOIN, qs.get('join')); history.replaceState(null, '', location.pathname + location.hash); if (SUPA) setTimeout(async () => { const { data: { session } } = await SUPA.auth.getSession(); if (!session) { toast('Logga in för att gå med i listan', { ms: 4000 }); openMenu(); } }, 900); }
+if (qs.get('join')) { lsSet(LS_JOIN, qs.get('join')); history.replaceState(null, '', location.pathname + location.hash); if (SUPA) setTimeout(async () => { const { data: { session } } = await SUPA.auth.getSession(); if (!session) { toast('Logga in för att gå med i listan', { ms: 4000 }); openAcct(); } }, 900); }
 const sharedIn = qs.get('share') === '1' || qs.get('text') || qs.get('url') || qs.get('title');
 if (sharedIn) history.replaceState(null, '', location.pathname + location.hash);
 const h0 = location.hash.slice(1);
