@@ -332,6 +332,12 @@ dialog.out .sheet{animation:none !important;opacity:0;transition:opacity 150ms v
 .pop button svg{color:var(--muted);flex:0 0 auto}.pop button.danger svg{color:inherit}
 .note-p{font-size:15px;line-height:1.5;margin:0 0 var(--s4);white-space:pre-wrap;overflow-wrap:anywhere}
 .note-p a{color:var(--secondary);font-weight:600}
+.login-box{display:grid !important;gap:10px;cursor:default;align-items:stretch}
+.login-box .tx small b{display:inline;font-size:inherit;color:var(--text)}
+.login-box .code-in{width:100%;border:1px solid var(--line);background:var(--card);border-radius:14px;padding:14px;font:700 26px/1 var(--font-mono,monospace);letter-spacing:10px;text-align:center;color:var(--text);font-variant-numeric:tabular-nums}
+.login-box .code-in.err{border:2px solid var(--danger)}
+.login-msg{color:var(--muted);font-weight:600;min-height:1em}
+.login-links{display:flex;justify-content:space-between}
 .about{margin:var(--s2) 0 0;font-size:12px;color:var(--muted);font-weight:600;text-align:center}
 .hero .art{position:absolute;inset:-20% 0 0 0;z-index:-2}
 .hero .art img{width:100%;height:100%;object-fit:cover}
@@ -966,7 +972,7 @@ const state = { events: [], mode: 'boot', canWrite: true, filter: 'alla', q: '',
 /* ---------- Supabase backend (used by the Netlify build; the artifact build uses the artifact db) ---------- */
 const CFG = window.BENTO_CONFIG || null;
 const SUPA = CFG && CFG.supabaseUrl && window.supabase ? window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseKey) : null;
-const LS_LIST = 'bento.list', LS_JOIN = 'bento.join';
+const LS_LIST = 'bento.list', LS_JOIN = 'bento.join', LS_LOGIN_EMAIL = 'bento.loginEmail';
 const canRead = () => (state.sample && state.sampleImages) || (!!CFG && !state.readerDown);
 const supa = {
   list: null, lists: [], chan: null,
@@ -974,7 +980,7 @@ const supa = {
   evToRow: ev => ({ id: ev.id, list_id: supa.list.id, title: ev.title, category: ev.category || 'annat', date: ev.date || '', date_kind: ev.dateKind || '', time: ev.time || '', end_date: ev.endDate || '', venue: ev.venue || '', city: ev.city || '', url: ev.url || '', note: ev.note || '', size: ev.size || 's', image: ev.image || '', by_user: ev.by || state.me, ticket: ev.ticket || '', with_who: ev.with || '', claim_by: ev.claimBy || null }),
   async init(){
     const { data: { session } } = await SUPA.auth.getSession();
-    SUPA.auth.onAuthStateChange((evn) => { if (evn === 'SIGNED_IN' && state.mode === 'local' && !supa.booting) location.reload(); });
+    SUPA.auth.onAuthStateChange((evn) => { if (evn === 'SIGNED_IN' && state.mode === 'local' && !supa.booting) { lsSet(LS_LOGIN_EMAIL, null); location.reload(); } });
     if (!session) { store.goLocal(); supaUI(); return; }
     supa.booting = true;
     state.user = session.user; state.me = session.user.id;
@@ -989,6 +995,8 @@ const supa = {
     supa.list = pick.lists; supa.lists = mem.map(m => m.lists); lsSet(LS_LIST, supa.list.id);
     state.mode = 'db'; state.canWrite = true;
     await supa.loadMembers(); await supa.load();
+    const local = (lsGet(LS_LOCAL) || []).filter(e => e && e.id && !/^(ex|p)-/.test(e.id) && !state.events.some(x => x.id === e.id));
+    if (local.length) { let n = 0; for (const ev of local) { try { await supa.save({ ...ev, by: state.me }); n++; } catch {} } if (n === local.length) lsSet(LS_LOCAL, []); if (n) toast(`${n} kort flyttade till ditt konto`); }
     supa.chan = SUPA.channel('events-' + supa.list.id).on('postgres_changes', { event: '*', schema: 'public', table: 'events', filter: 'list_id=eq.' + supa.list.id }, p => supa.onChange(p)).subscribe();
     supa.booting = false; updateBanner(); render(); supaUI();
   },
@@ -1003,7 +1011,8 @@ const supa = {
   async save(ev){ const { error } = await SUPA.from('events').upsert(supa.evToRow(ev)); if (error) throw error; const i = state.events.findIndex(e => e.id === ev.id); if (i >= 0) state.events[i] = ev; else state.events.push(ev); lsSet(LS_CACHE, state.events); vt('fade', render); },
   async remove(id){ const { error } = await SUPA.from('events').delete().eq('id', id); if (error) throw error; state.events = state.events.filter(e => e.id !== id); lsSet(LS_CACHE, state.events); vt('fade', render); },
   async upload(blob, id){ const path = `${supa.list.id}/${id}-${Date.now()}.jpg`; const { error } = await SUPA.storage.from('posters').upload(path, blob, { contentType: 'image/jpeg', upsert: true }); if (error) throw error; return SUPA.storage.from('posters').getPublicUrl(path).data.publicUrl; },
-  async signIn(email){ const { error } = await SUPA.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname } }); if (error) throw error; },
+  async signIn(email){ const { error } = await SUPA.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname, shouldCreateUser: true } }); if (error) throw error; },
+  async verify(email, code){ const { error } = await SUPA.auth.verifyOtp({ email, token: code, type: 'email' }); if (error) throw error; lsSet(LS_LOGIN_EMAIL, null); location.reload(); },
   async signOut(){ await SUPA.auth.signOut(); lsSet(LS_CACHE, []); location.reload(); },
   async switchList(id){ lsSet(LS_LIST, id); location.reload(); },
   inviteUrl(){ return supa.list ? `${location.origin}${location.pathname}?join=${supa.list.invite_code}` : ''; },
@@ -1022,7 +1031,10 @@ function supaUI(){
     const lists = supa.lists.length > 1 ? `<div class="lbl">Lista</div><div class="chipset">${supa.lists.map(l => `<button type="button" class="pressable" data-list="${l.id}" aria-pressed="${l.id === supa.list.id}">${esc(l.name)}</button>`).join('')}</div>` : '';
     acc.innerHTML = `<div class="lbl">Konto</div><div class="row-btn" style="cursor:default"><span class="av">${esc((state.names[state.me] || '?').charAt(0).toUpperCase())}</span><span class="tx"><b>${esc(state.names[state.me] || 'Du')}</b><small>${esc(state.user.email || '')} · ${esc(supa.list.name)}</small></span><button type="button" class="text-btn pressable" id="signOut">Logga ut</button></div>${lists}`;
   } else {
-    acc.innerHTML = `<div class="lbl">Konto</div><div class="rows"><div class="row-btn" style="display:grid;gap:10px;cursor:default"><span class="tx"><b>Logga in med e-post</b><small>Så delas korten med dina vänner och följer med mellan enheter. Inget lösenord, du får en länk.</small></span><div class="inline-in"><input id="loginEmail" type="email" inputmode="email" autocomplete="email" placeholder="namn@mejl.se"><button type="button" class="btn primary pressable" id="loginBtn" style="flex:0 0 auto">Skicka länk</button></div><small id="loginMsg" style="color:var(--muted);font-weight:600"></small></div></div>`;
+    const sent = lsGet(LS_LOGIN_EMAIL);
+    const standalone = matchMedia('(display-mode: standalone)').matches;
+    acc.innerHTML = sent ? `<div class="lbl">Konto</div><div class="rows"><div class="row-btn login-box"><span class="tx"><b>Kolla mejlen</b><small>${standalone ? 'Skriv koden vi skickade till' : 'Tryck på länken, eller skriv koden vi skickade till'} <b>${esc(sent)}</b>. Koden fungerar på vilken enhet som helst.</small></span><input id="loginCode" class="code-in" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="8" placeholder="Kod" aria-label="Kod från mejlet"><button type="button" class="btn primary pressable" id="codeBtn">Logga in</button><small id="loginMsg" class="login-msg"></small><span class="login-links"><button type="button" class="text-btn pressable" id="resendBtn">Skicka igen</button><button type="button" class="text-btn pressable" id="otherEmail">Annan e-post</button></span></div></div>`
+      : `<div class="lbl">Konto</div><div class="rows"><div class="row-btn login-box"><span class="tx"><b>Logga in med e-post</b><small>Då följer korten med mellan dator och mobil och kan delas. Inget lösenord, du får en kod.</small></span><div class="inline-in"><input id="loginEmail" type="email" inputmode="email" autocomplete="email" placeholder="namn@mejl.se"><button type="button" class="btn primary pressable" id="loginBtn" style="flex:0 0 auto">Skicka kod</button></div><small id="loginMsg" class="login-msg"></small></div></div>`;
   }
 }
 const store = {
@@ -1688,7 +1700,9 @@ document.addEventListener('click', e => {
   else if (t.id === 'mShare') { closeSheet($('#menu'), true); setTimeout(() => openShare(), 60); }
   else if (t.dataset.theme) setTheme(t.dataset.theme);
   else if (t.id === 'gLogin') { openMenu(t); setTimeout(() => $('#loginEmail')?.focus(), 450); }
-  else if (t.id === 'loginBtn') { const em = ($('#loginEmail').value || '').trim(); const msg = $('#loginMsg'); if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { msg.textContent = 'Skriv en giltig e-postadress.'; return; } t.disabled = true; msg.textContent = 'Skickar …'; supa.signIn(em).then(() => { msg.textContent = 'Kolla mejlen. Länken loggar in dig här.'; }).catch(e => { t.disabled = false; msg.textContent = /rate/i.test(e.message||'') ? 'För många försök. Vänta en stund.' : 'Gick inte. Försök igen.'; }); }
+  else if (t.id === 'loginBtn' || t.id === 'resendBtn') { const em = t.id === 'resendBtn' ? lsGet(LS_LOGIN_EMAIL) : ($('#loginEmail').value || '').trim().toLowerCase(); const msg = $('#loginMsg'); if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em || '')) { msg.textContent = 'Skriv en giltig e-postadress.'; return; } t.disabled = true; msg.textContent = 'Skickar …'; supa.signIn(em).then(() => { lsSet(LS_LOGIN_EMAIL, em); supaUI(); setTimeout(() => $('#loginCode')?.focus(), 60); if (t.id === 'resendBtn') $('#loginMsg').textContent = 'Nytt mejl skickat.'; }).catch(e => { t.disabled = false; msg.textContent = /rate|seconds/i.test(e.message||'') ? 'Vänta en minut innan du ber om ett nytt mejl.' : 'Gick inte. Försök igen.'; }); }
+  else if (t.id === 'codeBtn') { const code = ($('#loginCode').value || '').replace(/\D/g, ''); const msg = $('#loginMsg'); if (code.length < 6) { msg.textContent = 'Koden har 6 siffror.'; $('#loginCode').classList.add('err'); return; } t.disabled = true; msg.textContent = 'Loggar in …'; supa.verify(lsGet(LS_LOGIN_EMAIL), code).catch(() => { t.disabled = false; $('#loginCode').classList.add('err'); msg.textContent = 'Fel eller gammal kod. Be om en ny om den är äldre än en timme.'; }); }
+  else if (t.id === 'otherEmail') { lsSet(LS_LOGIN_EMAIL, null); supaUI(); setTimeout(() => $('#loginEmail')?.focus(), 60); }
   else if (t.id === 'signOut') supa.signOut();
   else if (t.dataset.list) supa.switchList(t.dataset.list);
   else if (t.id === 'moreDots') { const on = !$('#dmenu').classList.contains('on'); $('#dmenu').classList.toggle('on', on); t.setAttribute('aria-expanded', String(on)); }
@@ -1735,6 +1749,8 @@ document.addEventListener('click', e => {
   else if (t.id === 'moreBtn') { readForm(); setMore(!$('#more').classList.contains('open')); }
 });
 $('#form').addEventListener('submit', submitForm);
+document.addEventListener('input', e => { if (e.target.id === 'loginCode') { e.target.classList.remove('err'); const v = e.target.value.replace(/\D/g, ''); if (v !== e.target.value) e.target.value = v; if (v.length === 6 && !e.target.dataset.auto) { e.target.dataset.auto = '1'; $('#codeBtn').click(); setTimeout(() => { delete e.target.dataset.auto; }, 1500); } } });
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'loginEmail') { e.preventDefault(); $('#loginBtn').click(); } if (e.key === 'Enter' && e.target.id === 'loginCode') { e.preventDefault(); $('#codeBtn').click(); } });
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'withIn') { e.preventDefault(); patchEvent(currentId, { with: e.target.value.trim() }); } });
 let pT; $('#paste').addEventListener('input', () => { clearTimeout(pT); pT = setTimeout(applyQuick, 90); });
 $('#paste').addEventListener('paste', e => { const f = [...(e.clipboardData?.files || [])].find(x => x.type.startsWith('image/')); if (f) { e.preventDefault(); setImage(f); } });
