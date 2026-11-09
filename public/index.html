@@ -161,13 +161,13 @@ main{max-width:1100px;margin:0 auto;padding:var(--s4);view-transition-name:conte
 @media (min-width:900px){.grid{grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:180px;gap:var(--s5)}}
 .card{position:relative;overflow:hidden;border-radius:var(--r-l);background:var(--card);border:1px solid var(--line);box-shadow:0 1px 2px rgba(60,40,20,.05);transition:transform 250ms var(--ease-out),box-shadow 300ms var(--ease-out);text-align:left;display:flex;flex-direction:column;justify-content:flex-end;padding:var(--s4);color:#fff}
 @media (hover:hover){.card:hover{box-shadow:0 8px 30px rgba(0,0,0,.12);transform:translateY(-4px) scale(1.01)}.card:hover .pill{background:#fff;color:var(--pc)}.card:hover .pill svg{transform:scale(1.15)}}
-.card.l{grid-column:span 2;grid-row:span 2}.card.m{grid-column:span 2}
+.card.l{grid-column:span 2;grid-row:span 2}.card.m{grid-column:span 2}.card.t{grid-row:span 2}
 .card .art{position:absolute;inset:0;z-index:-2}
 .card .art img{width:100%;height:100%;object-fit:cover;transition:transform 700ms var(--ease-std)}
 .card:hover .art img{transform:scale(1.05)}
 .card .veil{position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.66))}
 .card .title{font-family:var(--font-display);font-weight:700;font-size:var(--fs-body);line-height:1.25;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 1px 10px rgba(0,0,0,.35)}
-.card.l .title{font-size:var(--fs-title)}.card.m .title{font-size:var(--fs-heading)}
+.card.l .title,.card.t .title{font-size:var(--fs-title)}.card.m .title{font-size:var(--fs-heading)}
 .card .sub{font-size:var(--fs-caption);font-weight:600;opacity:.9;margin-top:4px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 .card .top{position:absolute;top:var(--s3);left:var(--s3);right:var(--s3);display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .pill{white-space:nowrap;display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:5px 9px;border-radius:999px;background:var(--pc,var(--secondary));color:#fff;letter-spacing:.01em}
@@ -297,7 +297,7 @@ dialog.rise .sheet{animation:none !important;opacity:1;transition:opacity 220ms 
 dialog.out .sheet{animation:none !important;opacity:0;transition:opacity 150ms var(--ease-out)}
 @keyframes sheet-fade{from{opacity:0;translate:0 16px}to{opacity:1;translate:0 0}}
 @media (min-width:640px){dialog[open] .sheet{animation:modal-in var(--d-long) var(--ease-out) both}@keyframes modal-in{from{opacity:0;scale:.96;translate:0 8px}to{opacity:1;scale:1;translate:0 0}}}
-.sheet .scroll{overflow-y:auto;overscroll-behavior:contain;padding:0 var(--s4) var(--s4);touch-action:pan-y;scrollbar-width:thin}
+.sheet .scroll{overflow-y:auto;overscroll-behavior:contain;padding:0 var(--s4) calc(var(--s5,24px) + max(12px, env(safe-area-inset-bottom)));touch-action:pan-y;scrollbar-width:thin}
 .grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:10px auto 0;flex:0 0 auto}
 .sheet-h{display:flex;align-items:center;justify-content:space-between;padding:var(--s3) var(--s4);flex:0 0 auto;gap:var(--s2)}
 .sheet-h h2{font-size:18px;font-weight:800;flex:1}
@@ -340,7 +340,8 @@ dialog.out .sheet{animation:none !important;opacity:0;transition:opacity 150ms v
 .login-links{display:flex;justify-content:space-between}
 #quick[data-stage="start"] #preview,#quick[data-stage="thinking"] #preview,#quick[data-stage="pick"] #preview{display:none}
 #quick:not([data-stage="start"]) #wzStart{display:none}
-#quick[data-stage="pick"] #moreBtn,#quick[data-stage="thinking"] #moreBtn{display:none}
+#quick[data-stage="start"] #moreBtn,#quick[data-stage="pick"] #moreBtn,#quick[data-stage="thinking"] #moreBtn,#quick[data-stage="ask"] #moreBtn{display:none}
+#quick[data-stage="thinking"] #scan{display:none}
 #editor:has(#quick[data-stage="start"]) .sheet-foot,#editor:has(#quick[data-stage="thinking"]) .sheet-foot,#editor:has(#quick[data-stage="pick"]) .sheet-foot{display:none}
 #editor:has(#quick[hidden]) .sheet-foot{display:flex}
 .snap{display:flex;align-items:center;gap:16px;width:100%;min-height:132px;padding:20px;border-radius:var(--r-l);background:var(--primary);color:var(--primary-ink);text-align:left;box-shadow:0 12px 28px -14px rgba(90,46,28,.55)}
@@ -411,6 +412,25 @@ dialog.out .sheet{animation:none !important;opacity:0;transition:opacity 150ms v
 .row-btn.danger,.row-btn.danger .tx b{color:var(--danger)}.row-btn.danger .ic{background:color-mix(in srgb,var(--danger) 14%,transparent);color:var(--danger)}
 .btn.danger{background:var(--danger);color:#fff}
 input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none}
+.gal-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;min-height:48px;border-radius:var(--r);border:1px solid var(--line);background:var(--card);color:var(--text);font-size:15px;font-weight:700}
+#f-cam{display:none}
+.snap{min-height:120px}
+.sugg{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.sugg:empty{display:none}
+.sg{height:36px;padding:0 14px;border-radius:999px;background:var(--card-2);border:1px solid var(--line);font-size:14px;font-weight:700;color:var(--text);animation:pop var(--d-med) var(--ease-spring)}
+.wz-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}.wz-top .dots{margin:0}
+.wz-back{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--card-2);border:1px solid var(--line);color:var(--text);flex:0 0 auto}
+.wz-back svg{width:18px;height:18px}
+.open-sec{margin:0 0 20px -28px;position:relative;z-index:1;background:var(--surface);padding-bottom:4px}
+.open-sec h2{font-family:var(--font-display);font-size:20px;font-weight:800;margin:0 0 10px;display:flex;align-items:baseline;gap:8px}.open-sec h2 small{font:600 13px var(--font-mono,monospace);color:var(--muted)}
+.open-rail{display:flex;gap:12px;overflow-x:auto;margin:0 -16px;padding:2px 16px 6px;scroll-snap-type:x mandatory;scrollbar-width:none}.open-rail::-webkit-scrollbar{display:none}
+.open-item{flex:0 0 132px;scroll-snap-align:start;text-align:left;color:var(--text);display:grid;gap:4px}
+.open-item .th{height:170px;border-radius:16px;overflow:hidden;border:2px dashed color-mix(in srgb,var(--text) 18%,transparent)}
+.open-item .th img{width:100%;height:100%;object-fit:cover;opacity:.92}
+.open-item b{font-size:14px;font-weight:700;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.open-item small{font-size:12px;font-weight:700;color:var(--secondary)}
+.fold{margin-top:4px}.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:12px 0;font-weight:700;color:var(--muted);font-size:14px}
+.fold>summary::-webkit-details-marker{display:none}.fold>summary::after{content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin-left:auto;transition:transform var(--d-med)}
+.fold[open]>summary::after{transform:rotate(-135deg)}
 .about{margin:var(--s2) 0 0;font-size:12px;color:var(--muted);font-weight:600;text-align:center}
 .hero .art{position:absolute;inset:-20% 0 0 0;z-index:-2}
 .hero .art img{width:100%;height:100%;object-fit:cover}
@@ -433,7 +453,7 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .big-cd span{color:var(--muted);font-size:var(--fs-label);font-weight:600}
 .actions{display:flex;gap:var(--s2);flex-wrap:wrap}
 .actions .btn{flex:1 1 auto}
-.sheet-foot{position:sticky;bottom:0;padding:var(--s3) 0 0;background:linear-gradient(180deg,transparent,var(--card) 35%);display:flex;gap:var(--s2);margin-top:var(--s3)}
+.sheet-foot{position:sticky;bottom:0;padding:var(--s3) 0 var(--s2);background:linear-gradient(180deg,transparent,var(--card) 35%);display:flex;gap:var(--s2);margin-top:var(--s3)}
 .sheet-foot .btn{flex:1}
 .confirm{display:none;gap:var(--s2);align-items:center;margin-top:var(--s3);padding:var(--s3);border-radius:var(--r);background:color-mix(in srgb,var(--danger) 8%,transparent);font-size:14px}
 .confirm.on{display:flex;animation:enter var(--d-med) var(--ease-decel) both}
@@ -620,10 +640,11 @@ html.selmode .card .date{opacity:0}
 .inline-in input{flex:1;border:1px solid var(--line);background:var(--card-2);border-radius:12px;padding:10px 12px;font-size:15px;min-width:0}
 .exrow{display:flex;gap:12px;overflow-x:auto;padding:4px 16px 12px;margin:0 -16px;scroll-snap-type:x mandatory;scrollbar-width:none}
 .exrow::-webkit-scrollbar{display:none}
-.excard{flex:0 0 200px;scroll-snap-align:start;border-radius:20px;border:2px dashed var(--line);background:var(--card);padding:14px;text-align:left;display:grid;gap:6px;color:var(--text)}
-.excard .pill{justify-self:start}
-.excard b{font-family:var(--font-display);font-size:16px;line-height:1.2}
-.excard small{font-size:12px;color:var(--muted);font-weight:600}
+.tips-h{font-size:13px;font-weight:700;color:var(--muted);margin:6px 0 8px}
+.excard{flex:0 0 auto;max-width:240px;scroll-snap-align:start;border-radius:16px;border:0;background:color-mix(in srgb,var(--c) 10%,transparent);padding:10px 14px 10px 10px;text-align:left;display:flex;gap:10px;align-items:center;color:var(--text)}
+.excard .exi{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 22%,transparent);color:var(--c);flex:0 0 auto}
+.excard b{display:block;font-size:14px;font-weight:700;line-height:1.2}
+.excard small{display:block;font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* ============ View transitions: M3 patterns ============ */
 ::view-transition-old(root),::view-transition-new(root){animation-duration:var(--d-med)}
@@ -788,10 +809,11 @@ html[data-vt="card"]::view-transition-old(root),html[data-vt="card"]::view-trans
       <form class="f" id="form" novalidate>
         <div class="quick" id="quick" data-stage="start">
           <div class="wz-start" id="wzStart">
-            <button type="button" class="snap pressable" id="pickImg"><span class="snap-ic"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.2l1.3-2h6l1.3 2h1.2A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg></span><span class="snap-tx"><b>Fota affisch eller biljett</b><small>eller välj en skärmbild</small></span></button>
+            <button type="button" class="snap pressable" id="pickImg"><span class="snap-ic"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.2l1.3-2h6l1.3 2h1.2A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg></span><span class="snap-tx"><b>Fota affisch eller biljett</b></span></button>
+            <button type="button" class="gal-btn pressable" id="pickGal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>Välj bild eller skärmbild</button>
             <div class="ask-box"><textarea id="paste" rows="1" placeholder="…eller skriv vad det är" aria-label="Skriv vad det är" enterkeyhint="search"></textarea><button type="button" class="ask-go pressable" id="findBtn" aria-label="Hitta" hidden><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
-            <p class="wz-hint">Till exempel <button type="button" class="ex-q" data-q="Tove Lo Avicii Arena">Tove Lo Avicii Arena</button>, <button type="button" class="ex-q" data-q="Dramaten i december">Dramaten i december</button> eller en länk</p>
-            <input id="f-img" type="file" accept="image/*" tabindex="-1">
+            <div class="sugg" id="sugg"></div>
+            <input id="f-img" type="file" accept="image/*" tabindex="-1"><input id="f-cam" type="file" accept="image/*" capture="environment" tabindex="-1">
           </div>
           <div class="scan" id="scan" hidden></div>
           <div class="wz" id="wz"></div>
@@ -799,7 +821,7 @@ html[data-vt="card"]::view-transition-old(root),html[data-vt="card"]::view-trans
           <div class="catpick" id="catPick" hidden></div>
           <div class="need-row" id="needRow" hidden></div>
           <div class="wzq" id="wzq"></div>
-          <button type="button" class="link-btn" id="moreBtn" aria-expanded="false"><span id="moreLbl">Fyll i själv</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+          <button type="button" class="link-btn" id="moreBtn" aria-expanded="false"><span id="moreLbl">Ändra detaljer</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
         </div>
         <div class="more" id="more"><div>
           <div class="f" style="padding-top:4px">
@@ -819,6 +841,7 @@ html[data-vt="card"]::view-transition-old(root),html[data-vt="card"]::view-trans
               <div class="sizepick" id="sizePick">
                 <button type="button" class="pressable" data-size="s" aria-pressed="true"><span class="box"><i class="on"></i><i></i><i></i><i></i></span>Liten</button>
                 <button type="button" class="pressable" data-size="m" aria-pressed="false"><span class="box"><i class="on"></i><i class="on"></i><i></i><i></i></span>Bred</button>
+                <button type="button" class="pressable" data-size="t" aria-pressed="false"><span class="box"><i class="on"></i><i></i><i class="on"></i><i></i></span>Hög</button>
                 <button type="button" class="pressable" data-size="l" aria-pressed="false"><span class="box"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span>Stor</button>
               </div>
             </div>
@@ -1262,7 +1285,7 @@ function renderExamples(){
   let wrap = $('#exWrap'); if (!wrap) { wrap = document.createElement('div'); wrap.id = 'exWrap'; $('#view-rutnat').insertBefore(wrap, $('#newWrap')); }
   const own = state.events.filter(e => !/^(ex|p)-/.test(e.id)).length;
   if (state.loading || !state.canWrite || own >= 3) { wrap.innerHTML = ''; return; }
-  const h = `<div class="section-h" style="margin-top:4px"><h2>Kom igång</h2><span class="meta">tryck för att prova</span></div><div class="exrow">${EXAMPLES.map(([k,t,x]) => `<button type="button" class="excard pressable" data-ex="${esc(x)}"><span class="pill" style="--pc:${catOf(k).c}">${svgIcon(k)}${catOf(k).label}</span><b>${t}</b><small>“${esc(x)}”</small></button>`).join('')}</div>`;
+  const h = `<div class="tips-h">Tips: prova att lägga till</div><div class="exrow">${EXAMPLES.map(([k,t,x]) => `<button type="button" class="excard pressable" data-ex="${esc(x)}" style="--c:${catOf(k).c}"><span class="exi">${svgIcon(k, 16)}</span><span><b>${t}</b><small>${esc(x)}</small></span></button>`).join('')}</div>`;
   if (wrap.dataset.h !== h) { wrap.innerHTML = h; wrap.dataset.h = h; }
 }
 function renderGuest(){
@@ -1285,7 +1308,7 @@ function renderChips(){
   const el = $('#catChips'); if (el.dataset.h !== h) { el.innerHTML = h; el.dataset.h = h; }
 }
 function cardHTML(ev, i){
-  const c = catOf(ev.category); const size = ev.size === 'l' ? 'l' : ev.size === 'm' ? 'm' : '';
+  const c = catOf(ev.category); const size = ['l','m','t'].includes(ev.size) ? ev.size : '';
   return `<button type="button" class="card ${size} ${isSoon(ev)?'soon':''} ${isPast(ev)?'past':''} ${state.sel && state.sel.has(ev.id) ? 'selected' : ''}" data-open="${ev.id}" data-id="${ev.id}" style="--pc:${c.c};--i:${Math.min(i,12)}">
     ${artHTML(ev)}<span class="veil"></span>
     <span class="top"><span class="pill">${svgIcon(ev.category)}${c.label}</span><span class="date ${ev.date?'':'need'}">${esc(shortDate(ev))}</span></span>
@@ -1324,7 +1347,9 @@ function showEmpty(parent, on){
   } else if (!on && e) e.remove();
 }
 function renderTimeline(){
-  const list = visible(), upcoming = list.filter(e => !isPast(e)), past = list.filter(isPast).reverse();
+  const list = visible(), all = list.filter(e => !isPast(e)), past = list.filter(isPast).reverse();
+  const isOpen = e => { const k = kindOf(e); return !e.date || k === 'fran' || k === 'period'; };
+  const open = all.filter(isOpen), upcoming = all.filter(e => !isOpen(e));
   const tl = $('#tl'), bar = $('#monthChips').parentElement;
   if (!list.length) { tl.innerHTML = state.loading ? '<div class="skel" style="grid-template-columns:1fr;grid-auto-rows:96px"><i></i><i></i><i></i></div>' : ''; $('#monthChips').innerHTML=''; bar.style.display='none'; showEmpty(tl.parentElement, !state.loading); return; }
   showEmpty(tl.parentElement, false);
@@ -1336,9 +1361,11 @@ function renderTimeline(){
       <span class="body"><span class="h">${esc(ev.title)}</span><span class="sub">${esc([ev.time?`kl ${ev.time}`:'', ev.venue, ev.city].filter(Boolean).join(' · '))}</span>
       <span class="row"><span class="pill" style="--pc:${c.c}">${svgIcon(ev.category)}${c.label}</span><span class="cd">${countdown(ev)}</span><span class="cd">${byLabel(ev.by)}</span></span></span>
       ${ev.image?`<img class="thumb" src="${ev.image}" alt="" loading="lazy" decoding="async">`:''}<span class="chk">${state.sel && state.sel.has(ev.id) ? I.check : ''}</span></button>`; };
-  let h = `<div class="today" id="todayMark">Idag, ${nodot(fmtShort.format(new Date()))}</div>`;
+  const openLbl = e => { const k = kindOf(e); if (!e.date) return e.endDate ? `t.o.m. ${nodot(fmtShort.format(parseISO(e.endDate)))}` : 'datum ej satt'; const d = daysUntil(e.date); if (k === 'fran') return d > 0 ? `från ${nodot(fmtShort.format(parseISO(e.date)))}` : 'går nu'; return d > 0 ? `${nodot(fmtShort.format(parseISO(e.date)))}–${e.endDate ? nodot(fmtShort.format(parseISO(e.endDate))) : ''}` : `går t.o.m. ${e.endDate ? nodot(fmtShort.format(parseISO(e.endDate))) : '…'}`; };
+  let h = open.length ? `<section class="open-sec"><h2>Att boka in<small>${open.length}</small></h2><div class="open-rail">${open.map(e => { const c = catOf(e.category); return `<button type="button" class="open-item pressable" data-open="${e.id}" data-id="${e.id}"><span class="th" style="background:linear-gradient(135deg,${c.g[0]},${c.g[1]})">${okImg(e.image) ? `<img src="${e.image}" alt="" loading="lazy" onerror="this.remove()">` : ''}</span><b>${esc(e.title)}</b><small>${esc(openLbl(e))}</small></button>`; }).join('')}</div></section>` : '';
+  h += `<div class="today" id="todayMark">Idag, ${nodot(fmtShort.format(new Date()))}</div>`;
   for (const [k, evs] of groups) h += `<section class="tl-month" id="m-${k}"><h2>${k === 'utan' ? 'Utan datum' : cap(fmtMonth.format(parseISO(k+'-01')))}<small>${evs.length} kort</small></h2><div class="tl-list">${evs.map(item).join('')}</div></section>`;
-  if (!upcoming.length) h += `<div class="empty" style="margin-left:-28px"><h3>Inget kommande</h3></div>`;
+  if (!upcoming.length) h += `<div class="empty" style="margin-left:-28px"><h3>Inget inbokat</h3>${open.length ? '<p>Välj en dag på något ovan så hamnar det här.</p>' : ''}</div>`;
   if (past.length) h += `<details class="past-wrap"><summary>Passerat (${past.length})</summary><div class="tl-list" style="margin-top:12px">${past.map(item).join('')}</div></details>`;
   tl.innerHTML = h;
   $('#monthChips').innerHTML = [...groups.keys()].map(k => `<button type="button" class="chip pressable" data-month="m-${k}" aria-pressed="false">${k === 'utan' ? 'Utan datum' : cap(nodot(fmtMon.format(parseISO(k+'-01')))) + ' ' + k.slice(2,4)}</button>`).join('');
@@ -1376,7 +1403,7 @@ function setView(v, push=true){
   if (same) apply(); else vt('axis', apply, dir);
   if (push && location.hash !== '#' + v) location.hash = v;
 }
-function refilter(){ vt('fade', render); }
+function refilter(){ if (document.querySelector('dialog[open]')) render(); else vt('fade', render); }
 
 /* ---------- Sheets: FLIP morph open/close (transform-only, compositor friendly) ---------- */
 const MORPH_EASE = 'cubic-bezier(.22,1,.36,1)';
@@ -1539,13 +1566,13 @@ const fmtDay = new Intl.DateTimeFormat('sv-SE', { weekday: 'short', day: 'numeri
 const dayLabel = iso => nodot(fmtDay.format(parseISO(iso)));
 const wz = {
   stage: 'start', cands: [], step: 0, steps: [], timer: 0, reqId: 0,
-  setStage(st){ this.stage = st; $('#quick').dataset.stage = st; },
-  reset(){ clearInterval(this.timer); this.reqId++; this.cands = []; this.step = 0; this.steps = []; $('#wz').innerHTML = ''; $('#wzq').innerHTML = ''; this.setStage('start'); },
+  setStage(st){ this.stage = st; $('#quick').dataset.stage = st; $('#moreBtn').style.display = ''; },
+  reset(){ clearInterval(this.timer); if ($('#sugg')) $('#sugg').innerHTML = ''; this.reqId++; this.cands = []; this.step = 0; this.steps = []; $('#wz').innerHTML = ''; $('#wzq').innerHTML = ''; this.setStage('start'); },
   thinking(file, lines){
     clearInterval(this.timer); this.setStage('thinking');
     const ph = file ? `<div class="ph"><img src="${URL.createObjectURL(file)}" alt=""></div>` : `<span class="t-matrix" style="transform:scale(1.6);margin:18px">${[0,1,2,1,2,3,2,3,4].map(d => `<i style="--d:${d}"></i>`).join('')}</span>`;
     const L = lines || (file ? ['Läser affischen …', 'Letar efter datum och plats …', 'Söker originalaffischen …', 'Kollar biljettsidor …'] : ['Söker …', 'Letar efter datum och plats …', 'Hittar bilder …', 'Nästan klart …']);
-    $('#wz').innerHTML = `<div class="wz-think">${ph}<b>${file ? 'Kollar vad det är' : 'Letar upp det'}</b><small id="wzLine">${L[0]}</small><button type="button" class="wz-skip" id="wzManual">Fyll i själv i stället</button></div>`;
+    $('#wz').innerHTML = `<div class="wz-think">${ph}<b>${file ? 'Kollar vad det är' : 'Letar upp det'}</b><small id="wzLine">${L[0]}</small><button type="button" class="wz-skip" id="wzCancel">Avbryt</button></div>`;
     let i = 0; this.timer = setInterval(() => { i = Math.min(i + 1, L.length - 1); const el = $('#wzLine'); if (el) { el.textContent = L[i]; el.style.animation = 'none'; void el.offsetWidth; el.style.animation = ''; } }, 2600);
   },
   async find(seen){
@@ -1585,17 +1612,19 @@ const wz = {
   },
   ask(){
     const st = [];
-    if (!draft.title) st.push('what');
+    const venueOnly = draft.title && (VENUES.some(v => v.toLowerCase() === draft.title.toLowerCase()) || draft.title === draft.venue);
+    if (venueOnly && !draft.venue) draft.venue = draft.title;
+    if (!draft.title || venueOnly) { st.push('what'); if (venueOnly) draft._askVenue = draft.venue; }
     if ((draft._images || []).length) st.push('img');
     st.push('when', 'ticket', 'with');
     this.steps = st; this.step = 0; this.setStage('ask'); $('#wz').innerHTML = ''; renderPreview(true); this.renderQ();
   },
-  next(){ this.step++; if (this.step >= this.steps.length) { this.setStage('done'); $('#wzq').innerHTML = `<p class="wz-done">${I.check}Klart. Spara, eller ändra något ovan.</p>`; return; } this.renderQ(); },
-  back(){ if (this.step > 0) { this.step--; this.renderQ(); } else if (this.cands.length) this.showPick(); else this.reset(); },
+  next(){ this.step++; if (this.step >= this.steps.length) { this.setStage('done'); $('#wzq').innerHTML = `<div class="wz-top"><button type="button" class="wz-back pressable" id="wzBack" aria-label="Tillbaka">${ic('<path d="M15 6l-6 6 6 6"/>')}</button></div><p class="wz-done">${I.check}Klart att spara</p>`; $('#moreBtn').style.display = 'flex'; return; } this.renderQ(); },
+  back(){ if (this.stage === 'done') { this.setStage('ask'); this.step = this.steps.length - 1; this.renderQ(); return; } if (this.step > 0) { this.step--; this.renderQ(); } else if (this.cands.length) this.showPick(); else this.reset(); },
   renderQ(){
-    const k = this.steps[this.step]; const dots = `<div class="dots">${this.steps.map((_, i) => `<i class="${i <= this.step ? 'on' : ''}"></i>`).join('')}</div>`;
+    const k = this.steps[this.step]; const dots = `<div class="wz-top"><button type="button" class="wz-back pressable" id="wzBack" aria-label="Tillbaka">${ic('<path d="M15 6l-6 6 6 6"/>')}</button><div class="dots">${this.steps.map((_, i) => `<i class="${i <= this.step ? 'on' : ''}"></i>`).join('')}</div></div>`;
     let q = '', body = '';
-    if (k === 'what') { q = 'Vad heter det?'; body = `<div class="wz-in"><input id="wzWhat" maxlength="90" placeholder="Till exempel Tove Lo" value="${esc(draft.title || '')}"><button type="button" class="btn primary pressable" id="wzWhatOk" style="flex:0 0 auto">OK</button></div>`; }
+    if (k === 'what') { q = draft._askVenue ? `Vad ska du se på ${esc(draft._askVenue)}?` : 'Vad heter det?'; body = `<div class="wz-in"><input id="wzWhat" maxlength="90" placeholder="Titel" value="${draft._askVenue ? '' : esc(draft.title || '')}"><button type="button" class="btn primary pressable" id="wzWhatOk" style="flex:0 0 auto">OK</button></div>`; }
     if (k === 'img') {
       q = 'Vilken bild?'; const own = draft._own && draft._own.image; const cur = draft._imgPick || (own ? 'own' : '0');
       body = `<div class="imgs">${own ? `<button type="button" class="imgo pressable" data-img="own" aria-pressed="${cur === 'own'}"><img src="${own}" alt=""><span>Ditt foto</span></button>` : ''}${draft._images.map((u, i) => `<button type="button" class="imgo pressable" data-img="${i}" aria-pressed="${cur === String(i)}"><img src="${esc(u)}" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"><span>Original</span></button>`).join('')}<button type="button" class="imgo flat pressable" data-img="none" aria-pressed="${cur === 'none'}" style="background:linear-gradient(135deg,${catOf(draft.category).g[0]},${catOf(draft.category).g[1]})">Ingen bild</button></div>`;
@@ -1650,15 +1679,25 @@ const wz = {
     if (t.id === 'wzWithOk') { draft.with = $('#wzWithIn').value.trim(); this.next(); return true; }
     if (t.id === 'wzWhatOk') { const v = $('#wzWhat').value.trim(); if (!v) return true; draft.title = v; fillForm(draft); renderPreview(true); this.next(); return true; }
     if (t.id === 'wzSkip') { if (this.steps[this.step] === 'when' && !draft.date) draft.noDate = true; this.next(); return true; }
+    if (t.id === 'wzCancel') { this.reset(); return true; }
+    if (t.id === 'wzBack') { this.back(); return true; }
     if (t.id === 'wzManual') { this.reqId++; clearInterval(this.timer); this.setStage('ask'); this.steps = ['when', 'ticket', 'with']; this.step = 0; $('#wz').innerHTML = ''; renderPreview(); setMore(true); this.renderQ(); return true; }
     if (t.id === 'findBtn') { this.find(); return true; }
+    if (t.dataset.sg) { const ta = $('#paste'); const v = ta.value; const i = v.toLowerCase().lastIndexOf(t.dataset.frag.toLowerCase()); ta.value = (i >= 0 ? v.slice(0, i) : v + ' ') + t.dataset.sg + ' '; ta.focus(); $('#sugg').innerHTML = ''; $('#findBtn').hidden = false; applyQuick(); return true; }
     if (t.classList.contains('ex-q')) { $('#paste').value = t.dataset.q; $('#findBtn').hidden = false; this.find(); return true; }
     return false;
   },
 };
 document.addEventListener('keydown', e => { if (e.key !== 'Enter') return; if (e.target.id === 'wzWithIn') { e.preventDefault(); $('#wzWithOk').click(); } if (e.target.id === 'wzWhat') { e.preventDefault(); $('#wzWhatOk').click(); } });
 
-function setMore(open){ $('#more').classList.toggle('open', open); $('#moreBtn').setAttribute('aria-expanded', String(open)); $('#moreLbl').textContent = open ? 'Dölj fält' : 'Fyll i själv'; }
+function renderSugg(){
+  const el = $('#sugg'); const v = $('#paste').value; const m = v.match(/([\p{L}\d][\p{L}\d .&'-]{1,})$/u);
+  const frag = m ? m[1].trim() : ''; if (frag.length < 3 || /^https?:/i.test(v)) { el.innerHTML = ''; return; }
+  const low = frag.toLowerCase(); const pool = [...new Set([...state.events.map(e => e.title), ...state.events.map(e => e.venue), ...VENUES].filter(Boolean))];
+  const hits = pool.filter(x => { const l = x.toLowerCase(); return l !== low && (l.startsWith(low) || l.split(/\s+/).some(w => w.startsWith(low))); }).slice(0, 4);
+  el.innerHTML = hits.map(h => `<button type="button" class="sg pressable" data-sg="${esc(h)}" data-frag="${esc(frag)}">${esc(h)}</button>`).join('');
+}
+function setMore(open){ $('#more').classList.toggle('open', open); $('#moreBtn').setAttribute('aria-expanded', String(open)); $('#moreLbl').textContent = open ? 'Dölj detaljer' : 'Ändra detaljer'; }
 function fillForm(d){ $('#f-title').value = d.title||''; $('#f-date').value = d.date||''; $('#f-time').value = d.time||''; $('#f-end').value = d.endDate||''; $('#f-venue').value = d.venue||''; $('#f-city').value = d.city||''; $('#f-url').value = d.url||''; $('#f-note').value = d.note||''; }
 function readForm(){ draft.title = $('#f-title').value.trim(); draft.date = $('#f-date').value; draft.time = $('#f-time').value; draft.endDate = $('#f-end').value; draft.venue = $('#f-venue').value.trim(); draft.city = $('#f-city').value.trim(); draft.url = $('#f-url').value.trim(); draft.note = $('#f-note').value.trim(); }
 function applyQuick(){
@@ -1835,6 +1874,7 @@ function renderRnd(pick){
 
 /* ---------- Filter och sortering ---------- */
 function openFilter(fromEl){ renderFilter(); renderFindRes(); openSheet($('#filter'), fromEl, 'fab'); if (!state.events.length) return; setTimeout(() => { if (matchMedia('(min-width:640px)').matches) $('#q')?.focus({ preventScroll: true }); }, 420); }
+document.addEventListener('toggle', e => { if (e.target.id === 'foldF') state.foldOpen = e.target.open; }, true);
 function renderFilter(){
   const cities = [...new Set(state.events.map(e => (e.city||'').trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b,'sv'));
   const people = [...new Set(state.events.map(e => e.by).filter(Boolean))];
@@ -1843,6 +1883,7 @@ function renderFilter(){
   $('#filterBody').innerHTML = `
     <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input type="search" id="q" placeholder="Sök titel, plats, anteckning" aria-label="Sök bland korten" autocomplete="off" enterkeyhint="search" value="${esc(qv)}"><button type="button" id="qClear" aria-label="Rensa" ${qv ? '' : 'hidden'}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></label>
     <div class="fres-list" id="findRes"></div>
+    <details class="fold" id="foldF" ${state.foldOpen ? 'open' : ''}><summary>Filter och sortering${filtersActive() || state.filter !== 'alla' ? ' <i class="filt-dot"></i>' : ''}</summary>
     <div class="lbl">Sortera</div>
     <div class="seg">${[['datum','Datum'],['ny','Nytillagt'],['az','A–Ö']].map(([k,l]) => `<button type="button" data-sort="${k}" aria-pressed="${state.sort===k}">${l}</button>`).join('')}</div>
     <div class="lbl">Kategori</div>
@@ -1850,6 +1891,7 @@ function renderFilter(){
     ${cities.length ? `<div class="lbl">Stad</div><div class="chipset"><button type="button" class="pressable" data-fcity="" aria-pressed="${!state.city}">Alla</button>${cities.map(c => `<button type="button" class="pressable" data-fcity="${esc(c)}" aria-pressed="${state.city===c}">${esc(c)}</button>`).join('')}</div>` : ''}
     ${people.length > 1 && state.mode === 'db' ? `<div class="lbl">Tillagt av</div><div class="chipset"><button type="button" class="pressable" data-fby="" aria-pressed="${!state.by}">Alla</button>${people.map(id => `<button type="button" class="pressable" data-fby="${esc(id)}" aria-pressed="${state.by===id}"><span class="av" style="width:22px;height:22px;font-size:11px">${esc((state.names[id]||'?').charAt(0).toUpperCase())}</span>${esc(state.names[id] || 'Någon')}</button>`).join('')}</div>` : ''}
     <button type="button" class="toggle pressable" id="togglePast" aria-pressed="${state.showPast}"><span>Visa passerade</span><span class="sw"><i></i></span></button>
+    </details>
     <div class="sheet-foot"><button type="button" class="btn ghost pressable" id="filtReset" style="flex:0 0 auto" ${filtersActive() || state.q || state.filter !== 'alla' ? '' : 'hidden'}>Rensa</button><button type="button" class="btn primary pressable" data-close>Visa ${n} kort</button></div>`;
 }
 
@@ -2016,17 +2058,19 @@ document.addEventListener('click', e => {
   else if (t.id === 'copyCard') { $('#dmenu').classList.remove('on'); const ev = state.events.find(x => x.id === currentId); if (ev) navigator.clipboard.writeText(cardText(ev)).then(() => toast('Kopierat')).catch(() => toast('Kunde inte kopiera')); }
   else if (t.id === 'imgClear') { draft.image = ''; draft.imageBlob = null; renderImgPrev(); renderPreview(true); }
   else if (t.id === 'noDate') { draft.noDate = true; draft.date = ''; $('#form').requestSubmit(); }
-  else if (t.id === 'pickImg' || t.id === 'pickImg2') { if (!$('#f-img')) return; picking = true; setTimeout(() => { picking = false; }, 60000); $('#f-img').click(); }
+  else if (t.id === 'pickImg') { picking = true; setTimeout(() => { picking = false; }, 60000); $('#f-cam').click(); }
+  else if (t.id === 'pickGal' || t.id === 'pickImg2') { picking = true; setTimeout(() => { picking = false; }, 60000); $('#f-img').click(); }
   else if (t.id === 'moreBtn') { readForm(); setMore(!$('#more').classList.contains('open')); }
 });
 $('#form').addEventListener('submit', submitForm);
 document.addEventListener('input', e => { if (e.target.id === 'loginCode') { e.target.classList.remove('err'); const v = e.target.value.replace(/\D/g, ''); if (v !== e.target.value) e.target.value = v; if (v.length === 6 && !e.target.dataset.auto) { e.target.dataset.auto = '1'; $('#codeBtn').click(); setTimeout(() => { delete e.target.dataset.auto; }, 1500); } } });
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'loginEmail') { e.preventDefault(); $('#loginBtn').click(); } if (e.key === 'Enter' && e.target.id === 'loginCode') { e.preventDefault(); $('#codeBtn').click(); } });
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'withIn') { e.preventDefault(); patchEvent(currentId, { with: e.target.value.trim() }); } });
-let pT; $('#paste').addEventListener('input', () => { $('#findBtn').hidden = !$('#paste').value.trim(); clearTimeout(pT); pT = setTimeout(applyQuick, 90); });
+let pT; $('#paste').addEventListener('input', () => { $('#findBtn').hidden = !$('#paste').value.trim(); renderSugg(); clearTimeout(pT); pT = setTimeout(applyQuick, 90); });
 $('#paste').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if ($('#paste').value.trim()) wz.find(); } });
 $('#paste').addEventListener('paste', e => { const f = [...(e.clipboardData?.files || [])].find(x => x.type.startsWith('image/')); if (f) { e.preventDefault(); setImage(f); } });
 $('#form').addEventListener('input', e => { if (e.target.closest('#more') || e.target.closest('#needRow')) { readForm(); if ($('#n-title')) draft.title = $('#n-title').value.trim(); if ($('#n-date')) draft.date = $('#n-date').value; if (e.target.id === 'f-title' || e.target.id === 'f-date' || e.target.id === 'f-venue') renderPreview(); } });
+$('#f-cam').addEventListener('change', e => { picking = false; const f = e.target.files && e.target.files[0]; if (f) setImage(f); e.target.value = ''; });
 $('#f-img').addEventListener('change', e => { picking = false; const f = e.target.files && e.target.files[0]; if (f) setImage(f); e.target.value = ''; });
 window.addEventListener('focus', () => setTimeout(() => { picking = false; }, 800));
 $('#importFile').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if (f) importJson(f); e.target.value = ''; });
