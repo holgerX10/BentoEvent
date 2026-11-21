@@ -1,4 +1,5 @@
 import type { Config } from "@netlify/functions"
+import { publicUrl, safeFetch, readCapped, stripTracking } from "../lib/safe.mts"
 
 // Reads a public event page and returns what a Bento card needs. Partial results are fine:
 // the client fills the rest from the pasted text or asks the user for the one thing missing.
@@ -51,15 +52,17 @@ function dateFromText(text: string) {
 
 export default async (req: Request) => {
   const u = new URL(req.url).searchParams.get("url") || ""
-  let target: URL
-  try { target = new URL(u); if (!/^https?:$/.test(target.protocol)) throw 0 } catch { return Response.json({ error: "bad url" }, { status: 400 }) }
-  if (/^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(target.hostname)) return Response.json({ error: "blocked" }, { status: 400 })
+  const target = publicUrl(u)
+  if (!target) return Response.json({ error: "bad url" }, { status: 400 })
   let html = ""
   try {
-    const r = await fetch(target.toString(), { headers: { "user-agent": UA, accept: "text/html,*/*;q=0.8", "accept-language": "sv-SE,sv;q=0.9,en;q=0.7" }, redirect: "follow", signal: AbortSignal.timeout(7000) })
+    const r = await safeFetch(stripTracking(target).toString(), { headers: { "user-agent": UA, accept: "text/html,*/*;q=0.8", "accept-language": "sv-SE,sv;q=0.9,en;q=0.7" }, timeout: 7000 })
+    if (!r) return Response.json({ error: "blocked" }, { status: 400 })
     const ct = r.headers.get("content-type") || ""
     if (!r.ok || !/html|xml/.test(ct)) return Response.json({ partial: true, url: u, title: "", status: r.status })
-    html = (await r.text()).slice(0, 600_000)
+    const buf = await readCapped(r, 2_000_000)
+    if (!buf) return Response.json({ partial: true, url: u, title: "", error: "large" })
+    html = new TextDecoder().decode(buf).slice(0, 600_000)
   } catch { return Response.json({ partial: true, url: u, title: "", error: "fetch" }) }
   const ld = fromJsonLd(html)
   const ogTitle = meta(html, "og:title") || meta(html, "twitter:title") || decode((html.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [, ""])[1] || "")

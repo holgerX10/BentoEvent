@@ -304,6 +304,7 @@ dialog.out .sheet{animation:none !important;opacity:0;transition:opacity 150ms v
 .close{margin-left:auto;width:36px;height:36px;border-radius:999px;display:grid;place-items:center;background:var(--card-2);color:var(--muted)}
 .close svg{transition:transform var(--d-med) var(--ease-spring)}
 .close:hover svg{transform:rotate(90deg)}
+#shareBtn:hover svg,#moreDots:hover svg{transform:none}
 .fade-in > *{animation:enter var(--d-med) var(--ease-out) both;animation-delay:calc(var(--i,0) * 30ms + 40ms)}
 .hero{height:300px;border-radius:var(--r-l);overflow:hidden;position:relative;color:#fff;display:flex;align-items:flex-end;padding:var(--s4) var(--s4) 20px;isolation:isolate;margin:0 calc(-1 * var(--s4)) var(--s4)}
 #detail .scroll{padding-top:0;display:flex;flex-direction:column;flex:1 1 auto}
@@ -608,6 +609,10 @@ html.selmode .card .date{opacity:0}
 .gcard{display:flex;gap:12px;align-items:center;padding:12px;border-radius:16px;background:var(--card);border:1px solid var(--line);margin-bottom:16px}
 .gcard .ic{width:40px;height:40px;border-radius:12px;background:var(--primary);color:var(--primary-ink);display:grid;place-items:center;flex:0 0 auto}
 .gcard .tx{flex:1;min-width:0}.gcard .tx b{display:block;font-size:14px}.gcard .tx small{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-top:2px}
+.si-stage{display:grid;place-items:center;min-height:200px}
+.si-stage img{display:block;height:min(52vh,460px);aspect-ratio:9/16;border-radius:22px;box-shadow:0 10px 30px rgba(0,0,0,.22);background:var(--card-2);transition:opacity 180ms var(--ease-out,ease)}
+.si-stage[data-fmt="feed"] img{height:auto;width:min(100%,340px);aspect-ratio:1}
+.si-stage.busy img{opacity:.35}
 .seg{display:flex;background:var(--card-2);border:1px solid var(--line);border-radius:14px;padding:3px;gap:2px}
 .seg button{flex:1;padding:9px 0;border-radius:11px;font-size:13px;font-weight:700;color:var(--muted);transition:background 200ms,color 200ms}
 .seg button[aria-pressed="true"]{background:var(--text);color:var(--surface)}
@@ -804,7 +809,7 @@ html[data-vt="card"]::view-transition-old(root),html[data-vt="card"]::view-trans
 <dialog id="detail" aria-labelledby="dTitle">
   <div class="scrim" aria-hidden="true"></div>
   <div class="sheet">
-    <div class="sheet-h over"><div class="grab" aria-hidden="true"></div><h2 id="dTitle" class="sr">Kort</h2><button type="button" class="close pressable" id="moreDots" aria-label="Fler val" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.9" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.9" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.9" fill="currentColor" stroke="none"/></svg></button><button type="button" class="close pressable" data-close aria-label="Stäng"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="sheet-h over"><div class="grab" aria-hidden="true"></div><h2 id="dTitle" class="sr">Kort</h2><button type="button" class="close pressable" id="shareBtn" aria-label="Dela som bild"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M8 8l4-4 4 4M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg></button><button type="button" class="close pressable" id="moreDots" aria-label="Fler val" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.9" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.9" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.9" fill="currentColor" stroke="none"/></svg></button><button type="button" class="close pressable" data-close aria-label="Stäng"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="pop" id="dmenu" role="menu"></div>
     <div class="scroll" id="detailBody"></div>
   </div>
@@ -870,6 +875,19 @@ html[data-vt="card"]::view-transition-old(root),html[data-vt="card"]::view-trans
 </dialog>
 
 <!-- Share -->
+<dialog id="shimg" aria-labelledby="siTitle">
+  <div class="scrim" aria-hidden="true"></div>
+  <div class="sheet">
+    <div class="grab" aria-hidden="true"></div>
+    <div class="sheet-h"><h2 id="siTitle">Dela</h2><button type="button" class="close pressable" data-close aria-label="Stäng"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="scroll" style="gap:14px">
+      <div class="si-stage" id="siStage" data-fmt="story"><img id="siImg" alt="Förhandsvisning av delningsbilden"></div>
+      <div class="seg" role="group" aria-label="Format"><button type="button" data-sifmt="story" aria-pressed="true">Story</button><button type="button" data-sifmt="feed" aria-pressed="false">Kvadrat</button></div>
+      <div class="sheet-foot" style="margin-top:0"><button type="button" class="btn ghost pressable" id="siSave" style="flex:0 0 auto">Spara bild</button><button type="button" class="btn primary pressable" id="siShare">Dela</button></div>
+    </div>
+  </div>
+</dialog>
+
 <dialog id="share" aria-labelledby="sTitle">
   <div class="scrim" aria-hidden="true"></div>
   <div class="sheet">
@@ -1581,6 +1599,112 @@ async function patchEvent(id, patch){
 }
 function cardText(ev){ return [`Vad: ${ev.title}`, `När: ${ev.date || (ev.endDate ? 'till ' + ev.endDate : 'datum saknas')}${ev.endDate && ev.endDate !== ev.date ? ' – ' + ev.endDate : ''}${ev.time ? ' ' + ev.time : ''}`, (ev.venue||ev.city) ? `Var: ${[ev.venue, ev.city].filter(Boolean).join(', ')}` : '', ev.url ? `Länk: ${ev.url}` : '', `Kategori: ${ev.category}`, ev.note ? `Anteckning: ${ev.note}` : ''].filter(Boolean).join('\n'); }
 
+/* ---------- Share image: the card as a picture (Story 9:16, square 1:1) ---------- */
+const SI = { story: { w: 1080, h: 1920 }, feed: { w: 1080, h: 1080 } };
+const si = { fmt: 'story', blob: null, url: '', ev: null, run: 0 };
+const loadImgEl = (src, cors) => new Promise(res => { const im = new Image(); if (cors) im.crossOrigin = 'anonymous'; im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
+const cleanCanvas = im => { try { const c = document.createElement('canvas'); c.width = c.height = 2; const x = c.getContext('2d'); x.drawImage(im, 0, 0, 2, 2); x.getImageData(0, 0, 1, 1); return true; } catch { return false; } };
+async function shareArt(ev){
+  if (!okImg(ev.image)) return null;
+  if (/^(data|blob):/.test(ev.image)) return loadImgEl(ev.image);
+  let im = await loadImgEl(ev.image, true); if (im && cleanCanvas(im)) return im;
+  if (/^https:/.test(ev.image) && canRead()) { im = await loadImgEl('/api/img?url=' + encodeURIComponent(ev.image)); if (im && cleanCanvas(im)) return im; }
+  return null;
+}
+// One strong colour from the poster, falling back to the category colour.
+function accentOf(im, fallback){
+  try {
+    const c = document.createElement('canvas'); c.width = c.height = 24; const x = c.getContext('2d'); x.drawImage(im, 0, 0, 24, 24);
+    const d = x.getImageData(0, 0, 24, 24).data; let r = 0, g = 0, b = 0, w = 0;
+    for (let i = 0; i < d.length; i += 4) { const mx = Math.max(d[i], d[i+1], d[i+2]), mn = Math.min(d[i], d[i+1], d[i+2]); const sat = mx ? (mx - mn) / mx : 0, k = sat * sat * (mx / 255) + .002; r += d[i] * k; g += d[i+1] * k; b += d[i+2] * k; w += k; }
+    return [r / w, g / w, b / w].map(Math.round);
+  } catch { const h = fallback.replace('#', ''); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); }
+}
+const lumOf = ([r, g, b]) => { const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }; return .2126 * f(r) + .7152 * f(g) + .0722 * f(b); };
+function rr(x, X, Y, W, H, R){ x.beginPath(); x.moveTo(X + R, Y); x.arcTo(X + W, Y, X + W, Y + H, R); x.arcTo(X + W, Y + H, X, Y + H, R); x.arcTo(X, Y + H, X, Y, R); x.arcTo(X, Y, X + W, Y, R); x.closePath(); }
+function cover(x, im, X, Y, W, H){ const s = Math.max(W / im.width, H / im.height), dw = im.width * s, dh = im.height * s; x.drawImage(im, X + (W - dw) / 2, Y + (H - dh) / 2, dw, dh); }
+function wrapLines(x, text, maxW, maxLines){
+  const words = String(text).split(/\s+/).filter(Boolean), lines = []; let cur = '';
+  for (const w of words) { const t = cur ? cur + ' ' + w : w; if (x.measureText(t).width <= maxW || !cur) cur = t; else { lines.push(cur); cur = w; } }
+  if (cur) lines.push(cur);
+  if (lines.length > maxLines) { lines.length = maxLines; let l = lines[maxLines - 1]; while (l.length > 1 && x.measureText(l + '…').width > maxW) l = l.slice(0, -1); lines[maxLines - 1] = l.replace(/[\s,.–-]+$/, '') + '…'; }
+  return lines;
+}
+function fitTitle(x, text, maxW, maxH, sizes, maxLines){
+  for (const fs of sizes) { x.font = `800 ${fs}px Outfit, Manrope, system-ui, sans-serif`; const lines = wrapLines(x, text, maxW, 9); if (lines.length <= maxLines && lines.length * fs * 1.08 <= maxH && lines.every(l => x.measureText(l).width <= maxW)) return { fs, lines }; }
+  const fs = sizes[sizes.length - 1]; x.font = `800 ${fs}px Outfit, Manrope, system-ui, sans-serif`; return { fs, lines: wrapLines(x, text, maxW, Math.max(1, Math.min(maxLines, Math.floor(maxH / (fs * 1.08))))) };
+}
+async function renderShareImage(ev, fmt){
+  const { w, h } = SI[fmt], cat = catOf(ev.category);
+  try { await Promise.all(['800 80px Outfit', '700 40px Manrope', '600 30px "JetBrains Mono"'].map(f => document.fonts.load(f))); } catch {}
+  const im = await shareArt(ev);
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const x = cv.getContext('2d');
+  const acc = im ? accentOf(im, cat.c) : accentOf(null, cat.c), accCss = `rgb(${acc.join(',')})`, accInk = lumOf(acc) > .42 ? '#1B1512' : '#FFFFFF';
+  // Backdrop: the poster, very soft, under a warm dark veil. Scaling a tiny copy up gives the blur on every browser.
+  if (im) { const t = document.createElement('canvas'); t.width = 36; t.height = Math.round(36 * h / w); cover(t.getContext('2d'), im, 0, 0, t.width, t.height); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high'; x.drawImage(t, -w * .08, -h * .08, w * 1.16, h * 1.16); x.fillStyle = 'rgba(20,16,13,.58)'; x.fillRect(0, 0, w, h); }
+  else { const g = x.createLinearGradient(0, 0, w, h); g.addColorStop(0, '#2A2522'); g.addColorStop(1, '#171412'); x.fillStyle = g; x.fillRect(0, 0, w, h); }
+  const story = fmt === 'story', R = 56, G = 24;
+  const P = story ? { x: 64, y: 250, w: 952, h: 1000 } : { x: 48, y: 48, w: 560, h: 984 };
+  const D = story ? { x: 64, y: 1274, w: 300, h: 300 } : { x: 632, y: 48, w: 400, h: 300 };
+  const T = story ? { x: 64 + 300 + G, y: 1274, w: 952 - 300 - G, h: 300 } : { x: 632, y: 48 + 300 + G, w: 400, h: 560 };
+  const B = story ? { x: 64, y: 1606, w: 952, h: 64 } : { x: 632, y: 956, w: 400, h: 76 };
+  // Poster tile
+  x.save(); x.shadowColor = 'rgba(0,0,0,.35)'; x.shadowBlur = 60; x.shadowOffsetY = 20; rr(x, P.x, P.y, P.w, P.h, R); x.fillStyle = cat.g[1]; x.fill(); x.restore();
+  x.save(); rr(x, P.x, P.y, P.w, P.h, R); x.clip();
+  if (im) cover(x, im, P.x, P.y, P.w, P.h);
+  else { const g = x.createLinearGradient(P.x, P.y, P.x + P.w, P.y + P.h); g.addColorStop(0, cat.g[0]); g.addColorStop(1, cat.g[1]); x.fillStyle = g; x.fillRect(P.x, P.y, P.w, P.h); x.fillStyle = 'rgba(255,255,255,.94)'; x.textAlign = 'left'; x.textBaseline = 'alphabetic'; const ft = fitTitle(x, ev.title, P.w - 112, P.h * .5, [150, 128, 108, 92, 78, 64], 5); ft.lines.forEach((l, i) => x.fillText(l, P.x + 56, P.y + P.h - 64 - (ft.lines.length - 1 - i) * ft.fs * 1.08)); }
+  x.restore();
+  // Date tile
+  rr(x, D.x, D.y, D.w, D.h, R); x.fillStyle = accCss; x.fill(); x.fillStyle = accInk; x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+  const cx = D.x + D.w / 2;
+  if (ev.date) {
+    const d = parseISO(ev.date), span = ev.endDate && ev.endDate > ev.date ? Math.round((parseISO(ev.endDate) - d) / 864e5) + 1 : 0;
+    const top = span ? `${span} dagar` : nodot(new Intl.DateTimeFormat('sv-SE', { weekday: 'long' }).format(d));
+    const mon = nodot(new Intl.DateTimeFormat('sv-SE', { month: 'short' }).format(d)) + (d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : '');
+    x.font = '600 30px "JetBrains Mono", ui-monospace, monospace'; x.globalAlpha = .82; x.fillText(top.toUpperCase(), cx, D.y + 66); x.globalAlpha = 1;
+    x.font = '800 150px Outfit, Manrope, system-ui, sans-serif'; x.fillText(String(d.getDate()), cx, D.y + 200);
+    x.font = '700 40px Manrope, system-ui, sans-serif'; x.fillText(mon.toUpperCase(), cx, D.y + 256);
+  } else {
+    x.font = '800 150px Outfit, Manrope, system-ui, sans-serif'; x.fillText('?', cx, D.y + 196);
+    x.font = '700 34px Manrope, system-ui, sans-serif'; x.fillText('DATUM', cx, D.y + 252);
+  }
+  // Info tile
+  rr(x, T.x, T.y, T.w, T.h, R); x.fillStyle = '#FFF8EE'; x.fill(); x.textAlign = 'left';
+  const pad = 40, tw = T.w - pad * 2, place = [ev.venue, ev.city].filter(Boolean).join(', '), sub = [ev.time ? 'kl ' + ev.time : '', place].filter(Boolean).join(' · ');
+  x.fillStyle = '#6B6257'; x.font = '600 26px "JetBrains Mono", ui-monospace, monospace'; x.fillText(cat.label.toUpperCase(), T.x + pad, T.y + pad + 22);
+  const subLines = sub ? (x.font = '600 32px Manrope, system-ui, sans-serif', wrapLines(x, sub, tw, story ? 1 : 3)) : [];
+  const subH = subLines.length * 42, titleTop = T.y + pad + 22 + 20, titleH = T.y + T.h - pad - subH - (subH ? 14 : 0) - titleTop;
+  const ft = fitTitle(x, im ? ev.title : (ev.date ? countdown(ev).replace(/^./, c => c.toUpperCase()) : 'Datum inte valt'), tw, titleH, story ? [72, 62, 54, 46, 40, 34] : [68, 58, 50, 44, 38], story ? 3 : 6);
+  x.fillStyle = '#1B1512'; x.font = `800 ${ft.fs}px Outfit, Manrope, system-ui, sans-serif`;
+  ft.lines.forEach((l, i) => x.fillText(l, T.x + pad, titleTop + ft.fs * .92 + i * ft.fs * 1.08));
+  x.fillStyle = '#6B6257'; x.font = '600 32px Manrope, system-ui, sans-serif';
+  subLines.forEach((l, i) => x.fillText(l, T.x + pad, T.y + T.h - pad - (subLines.length - 1 - i) * 42 - 4));
+  // Brand: the three-box mark and the name
+  const m = story ? 52 : 56, bx = story ? (w - (m + 16 + 150)) / 2 : B.x + 8, by = B.y + (B.h - m) / 2;
+  rr(x, bx, by, m, m, 14); x.fillStyle = '#FAD4C0'; x.fill(); x.fillStyle = '#3B1D10';
+  const q = m * .18, gap = m * .1, cw = (m - q * 2 - gap) / 2;
+  rr(x, bx + q, by + q, cw, m - q * 2, 4); x.fill(); rr(x, bx + q + cw + gap, by + q, cw, (m - q * 2 - gap) / 2, 4); x.fill(); rr(x, bx + q + cw + gap, by + q + (m - q * 2 - gap) / 2 + gap, cw, (m - q * 2 - gap) / 2, 4); x.fill();
+  x.fillStyle = '#FFFFFF'; x.textAlign = 'left'; x.textBaseline = 'middle'; x.font = '800 44px Outfit, Manrope, system-ui, sans-serif'; x.fillText('Bento', bx + m + 16, by + m / 2 + 3);
+  return new Promise(res => cv.toBlob(res, 'image/jpeg', .92));
+}
+async function drawShare(){
+  const run = ++si.run, st = $('#siStage'); st.dataset.fmt = si.fmt; st.classList.add('busy');
+  document.querySelectorAll('[data-sifmt]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.sifmt === si.fmt)));
+  let blob = null; try { blob = await renderShareImage(si.ev, si.fmt); } catch {}
+  if (run !== si.run) return;
+  if (!blob) { toast('Bilden gick inte att skapa'); st.classList.remove('busy'); return; }
+  if (si.url) URL.revokeObjectURL(si.url);
+  si.blob = blob; si.url = URL.createObjectURL(blob); const img = $('#siImg'); img.onload = () => st.classList.remove('busy'); img.src = si.url;
+}
+function openShareImage(ev){ si.ev = ev; si.blob = null; $('#siImg').removeAttribute('src'); openSheet($('#shimg')); drawShare(); }
+const shareFile = () => new File([si.blob], `bento-${String(si.ev.title).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'kort'}.jpg`, { type: 'image/jpeg' });
+function saveShareImage(){ if (!si.blob) return; const a = document.createElement('a'); a.href = si.url; a.download = shareFile().name; document.body.appendChild(a); a.click(); a.remove(); toast('Bilden sparad'); }
+async function sendShareImage(){
+  if (!si.blob) return; const f = shareFile(), ev = si.ev;
+  if (navigator.canShare && navigator.canShare({ files: [f] })) { try { await navigator.share({ files: [f], title: ev.title, text: [ev.title, ev.date ? dateLine(ev) : '', ev.url || ''].filter(Boolean).join(' · ') }); } catch (e) { if (e && e.name !== 'AbortError') saveShareImage(); } }
+  else saveShareImage();
+}
+
 /* ---------- Editor: quick add + fallback form ---------- */
 let draft = {}, parsed = {}, picking = false;
 const F_ = ['title','date','time','end','venue','city','url','note'];
@@ -2114,6 +2238,10 @@ document.addEventListener('click', e => {
   else if (t.id === 'delBtn') { $('#dmenu').classList.remove('on'); $('#confirm').classList.add('on'); $('#confirm').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
   else if (t.id === 'delNo') $('#confirm').classList.remove('on');
   else if (t.id === 'delYes') { const id = currentId; closeSheet($('#detail'), true); removeCard([id]); }
+  else if (t.id === 'shareBtn') { $('#dmenu').classList.remove('on'); const ev = state.events.find(x => x.id === currentId); if (ev) openShareImage(ev); }
+  else if (t.dataset.sifmt) { if (si.fmt !== t.dataset.sifmt) { si.fmt = t.dataset.sifmt; drawShare(); } }
+  else if (t.id === 'siShare') sendShareImage();
+  else if (t.id === 'siSave') saveShareImage();
   else if (t.id === 'copyCard') { $('#dmenu').classList.remove('on'); const ev = state.events.find(x => x.id === currentId); if (ev) navigator.clipboard.writeText(cardText(ev)).then(() => toast('Kopierat')).catch(() => toast('Kunde inte kopiera')); }
   else if (t.id === 'imgClear') { draft.image = ''; draft.imageBlob = null; renderImgPrev(); renderPreview(true); }
   else if (t.id === 'noDate') { draft.noDate = true; draft.date = ''; $('#form').requestSubmit(); }

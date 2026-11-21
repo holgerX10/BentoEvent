@@ -1,4 +1,5 @@
 import type { Config } from "@netlify/functions"
+import { safeFetch, readCapped } from "../lib/safe.mts"
 import { catalogFind, catalogPut, cacheGet, cachePut, norm, sameTitle } from "../lib/catalog.mts"
 
 // Turns a few words, a pasted link or what Claude read off a photo into 1–3 concrete event candidates,
@@ -15,11 +16,12 @@ const metaImage = (html: string) => {
 }
 async function ogImage(url: string): Promise<string> {
   try {
-    const r = await fetch(url, { headers: { "user-agent": UA, accept: "text/html" }, redirect: "follow", signal: AbortSignal.timeout(4500) })
-    if (!r.ok) return ""
-    const html = (await r.text()).slice(0, 400_000)
+    const r = await safeFetch(url, { headers: { "user-agent": UA, accept: "text/html" }, timeout: 4500 })
+    if (!r || !r.ok) return ""
+    const buf = await readCapped(r, 2_000_000); if (!buf) return ""
+    const html = new TextDecoder().decode(buf).slice(0, 400_000)
     let img = metaImage(html).replace(/&amp;/g, "&")
-    if (img && img.startsWith("/")) img = new URL(img, r.url).toString()
+    if (img && img.startsWith("/")) img = new URL(img, url).toString()
     return /^https:\/\//.test(img) ? img : ""
   } catch { return "" }
 }
