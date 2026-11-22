@@ -1,6 +1,6 @@
 import type { Config } from "@netlify/functions"
 import { safeFetch, readCapped } from "../lib/safe.mts"
-import { catalogFind, catalogPut, cacheGet, cachePut, norm, sameTitle } from "../lib/catalog.mts"
+import { catalogFind, cacheGet, cachePut, norm, sameTitle, sign } from "../lib/catalog.mts"
 
 // Turns a few words, a pasted link or what Claude read off a photo into 1–3 concrete event candidates,
 // using web search for dates, venue, official page and poster images. The client asks the user to pick.
@@ -100,8 +100,10 @@ Högst ${complete ? 2 : 5} kandidater, matchningar först. note bara om det är 
     c.images = [...new Set(imgs.filter(Boolean))].slice(0, 4)
     delete c.pages
   }))
+  // Each suggestion is signed; it reaches the shared catalog only when someone saves it (see /api/confirm).
+  await Promise.all(cands.map(async (c: any) => { c.tok = await sign(c) }))
   const payload = { candidates: cands, question: String(data.question || "") }
-  if (cands.length) await Promise.all([cachePut(ckey, payload), catalogPut(cands.map((c: any) => ({ ...c, match: undefined, why: undefined })))])
+  if (cands.length) await cachePut(ckey, payload)
   return Response.json({ ...payload, source: "ai" })
 }
 

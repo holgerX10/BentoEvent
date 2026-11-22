@@ -956,7 +956,7 @@ dialog.vt .scrim{opacity:1;transition:none}
           <div class="acc-b"><div><div class="acc-in">
             <select id="siteSel" aria-label="Kort"></select>
             <div class="demo"><span>＋ Spara i Bento</span></div>
-            <p>Knappen kopierar kortet. Besökaren öppnar Bento, trycker + och klistrar in.</p>
+            
             <button type="button" class="btn primary pressable" data-copy="#siteSnippet">Kopiera kod</button>
           </div></div></div>
         </div>
@@ -1038,8 +1038,8 @@ function dateLine(ev){ if (!ev.date) return ev.endDate ? `Spelas till ${fmtLong.
 function shortDate(ev){ if (!ev.date) return ev.endDate ? `–${nodot(fmtShort.format(parseISO(ev.endDate)))}` : 'Datum?'; const a = nodot(fmtShort.format(parseISO(ev.date))); if (kindOf(ev) === 'fran') return `från ${a}`; return (ev.endDate && ev.endDate !== ev.date) ? `${a} – ${nodot(fmtShort.format(parseISO(ev.endDate)))}` : a; }
 function gcalLink(ev){
   const d = (ev.date || ev.endDate || todayISO()).replace(/-/g,''); let dates;
-  if (ev.time) { const [h,m] = ev.time.split(':'); dates = `${d}T${h}${m}00/${d}T${pad((Number(h)+2)%24)}${m}00`; }
-  else { const e = parseISO(ev.endDate || ev.date); e.setDate(e.getDate()+1); dates = `${d}/${iso(e).replace(/-/g,'')}`; }
+  if (ev.time) { const [h,m] = ev.time.split(':').map(Number), b = parseISO(ev.date || ev.endDate || todayISO()), e = new Date(b.getFullYear(), b.getMonth(), b.getDate(), h + 2, m); dates = `${d}T${pad(h)}${pad(m)}00/${iso(e).replace(/-/g,'')}T${pad(e.getHours())}${pad(e.getMinutes())}00`; }
+  else { const e = parseISO(ev.endDate || ev.date || todayISO()); e.setDate(e.getDate()+1); dates = `${d}/${iso(e).replace(/-/g,'')}`; }
   return `https://calendar.google.com/calendar/render?${new URLSearchParams({action:'TEMPLATE', text:ev.title, dates, details:(ev.note||'') + (ev.url ? `\n${ev.url}` : ''), location:[ev.venue,ev.city].filter(Boolean).join(', ')})}`;
 }
 const TICKET = { vill: 'Vill gå', har: 'Har biljett', saknas: 'Ingen biljett än' };
@@ -1898,6 +1898,7 @@ const wz = {
   choose(i){
     const c = this.cands[i];
     if (c) {
+      draft._cand = c.tok ? { title: c.title, category: c.category, venue: c.venue, city: c.city, date: c.date, dateKind: c.dateKind, endDate: c.endDate, time: c.time, url: c.url, dates: c.dates, images: c.images, tok: c.tok } : null;
       const keepPhoto = draft._own;
       Object.assign(draft, { title: c.title, category: CATS[c.category] ? c.category : draft.category, venue: c.venue || draft.venue || '', city: c.city || draft.city || '', date: c.date || '', dateKind: c.dateKind || (c.date ? 'exakt' : ''), endDate: c.endDate || '', time: c.time || draft.time || '', url: c.url || draft.url || '', note: c.note || draft.note || '' });
       draft._dates = (c.dates || []).filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d) && d >= iso(new Date()));
@@ -2067,7 +2068,7 @@ Regler: title = evenemangets namn (artist, film, föreställning), inte tagline.
   if (state.sample && state.sampleImages) { try { return await state.sample.json(prompt, { images: [blob], modelTier: 'default', cache: false }); } catch (e) { if (e && e.code === 'not_granted') { state.sampleImages = false; } return null; } }
   try {
     const b64 = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.readAsDataURL(blob); });
-    const r = await fetch('/api/read', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ image: b64, prompt }), signal: AbortSignal.timeout(40000) });
+    const r = await fetch('/api/read', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ image: b64, today: todayISO(), cropped: !!cropped }), signal: AbortSignal.timeout(40000) });
     if (r.status === 503) { state.readerDown = true; toast('Bildläsning är inte påslagen än'); return null; }
     if (!r.ok) return null; return await r.json();
   } catch { return null; }
@@ -2123,6 +2124,7 @@ async function submitForm(e){
   const btn = $('#saveBtn'); btn.disabled = true; btn.innerHTML = '<span class="t-matrix" aria-label="Sparar">' + [0,1,2,1,2,3,2,3,4].map(d => `<i style="--d:${d}"></i>`).join('') + '</span>';
   try {
     await store.save(ev);
+    if (draft._cand && CFG && !isEdit && ev.title === draft._cand.title && (ev.date || '') === (draft._cand.date || '')) { const { tok, ...candidate } = draft._cand; fetch('/api/confirm', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ candidate, tok }) }).catch(() => {}); }
     btn.classList.add('ok'); btn.innerHTML = '<svg class="t-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
     await new Promise(r => setTimeout(r, reduced() ? 0 : 520));
     closeSheet($('#editor'), true);
@@ -2239,7 +2241,9 @@ function openShare(fromEl){
 function renderSnippet(){
   const ev = state.events.find(e => e.id === $('#siteSel').value) || { title:'Namn på evenemanget', date: todayISO(), time:'19:00', venue:'Plats', city:'Stad', url:'https://', category:'konsert' };
   const card = cardText(ev); const url = location.href.split('#')[0];
-  $('#siteSnippet').value = `<a href="${url}#add" target="_blank" rel="noopener" class="bento-save" data-bento="${card.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\n/g,'&#10;')}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;background:#FAD4C0;color:#5A2E1C;font:600 14px system-ui,sans-serif;text-decoration:none">＋ Spara i Bento</a>\n<script>document.querySelectorAll('.bento-save').forEach(a=>a.addEventListener('click',()=>navigator.clipboard.writeText(a.dataset.bento).catch(()=>{})))<\/script>`;
+  const btn = href => `<a href="${href}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;background:#FAD4C0;color:#5A2E1C;font:600 14px system-ui,sans-serif;text-decoration:none">＋ Spara i Bento</a>`;
+  $('#siteSnippet').value = btn(url + '#add');
+  if (ev.id && SUPA) { const run = renderSnippet.run = (renderSnippet.run || 0) + 1; publishCard(ev).then(u => { const m = u.match(/\/e\/([a-f0-9]{12})$/); if (m && run === renderSnippet.run) $('#siteSnippet').value = btn(`${location.origin}/?save=${m[1]}`); }); }
 }
 async function copyFrom(sel){ const el = $(sel); try { await navigator.clipboard.writeText(el.value); toast('Kopierat'); } catch { toast('Kunde inte kopiera'); } }
 async function importJson(file){
@@ -2247,8 +2251,8 @@ async function importJson(file){
     const data = JSON.parse(await file.text()); const list = Array.isArray(data) ? data : data.events; if (!Array.isArray(list)) throw new Error('format');
     let n = 0;
     for (const raw of list) {
-      if (!raw || !raw.title || !/^\d{4}-\d{2}-\d{2}$/.test(raw.date || '')) continue;
-      await store.save({ id: String(raw.id || uid()).replace(/[^A-Za-z0-9_\-.~:@+]/g,'-'), title: String(raw.title).slice(0,90), category: CATS[raw.category] ? raw.category : 'annat', date: raw.date, time: raw.time || '', endDate: raw.endDate || '', venue: raw.venue || '', city: raw.city || '', url: raw.url || '', note: String(raw.note||'').slice(0,600), size: ['s','m','l'].includes(raw.size) ? raw.size : 's', image: typeof raw.image === 'string' && raw.image.startsWith('data:image/') ? raw.image : '', by: raw.by || state.me || '', createdAt: raw.createdAt || new Date().toISOString() }); n++;
+      if (!raw || !raw.title) continue; const okDate = v => /^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v : '';
+      await store.save({ id: String(raw.id || uid()).replace(/[^A-Za-z0-9_\-.~:@+]/g,'-'), title: String(raw.title).slice(0,90), category: CATS[raw.category] ? raw.category : 'annat', date: okDate(raw.date), dateKind: ['exakt','fran','period','okant'].includes(raw.dateKind) ? raw.dateKind : (okDate(raw.date) ? '' : 'okant'), time: /^\d{2}:\d{2}$/.test(raw.time || '') ? raw.time : '', endDate: okDate(raw.endDate), ticket: raw.ticket || '', with: String(raw.with || '').slice(0, 80), venue: raw.venue || '', city: raw.city || '', url: raw.url || '', note: String(raw.note||'').slice(0,600), size: ['s','m','l','t'].includes(raw.size) ? raw.size : 's', image: typeof raw.image === 'string' && raw.image.startsWith('data:image/') ? raw.image : '', by: raw.by || state.me || '', createdAt: raw.createdAt || new Date().toISOString() }); n++;
     }
     toast(n ? `${n} kort inlästa` : 'Inga kort i filen'); closeSheet($('#share'));
   } catch { toast('Kunde inte läsa filen'); }

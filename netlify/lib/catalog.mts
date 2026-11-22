@@ -29,6 +29,22 @@ export async function catalogFind(q: string, today: string) {
   }))
 }
 export const catalogPut = (items: any[]) => rpc("bento_catalog_put", { p_items: items })
+
+// The catalog only learns what a person confirmed. A suggestion carries a signature made with the server secret;
+// when the card is saved the client sends the suggestion back and /api/confirm checks the signature before storing it.
+const FIELDS = ["title", "category", "venue", "city", "date", "dateKind", "endDate", "time", "url"] as const
+export const candidateFacts = (c: any) => ({
+  ...Object.fromEntries(FIELDS.map(k => [k, String(c?.[k] ?? "")])),
+  dates: (Array.isArray(c?.dates) ? c.dates : []).map(String).slice(0, 12),
+  images: (Array.isArray(c?.images) ? c.images : []).map(String).slice(0, 4),
+})
+export async function sign(c: any): Promise<string> {
+  const secret = Netlify.env.get("BENTO_CATALOG_SECRET")
+  if (!secret) return ""
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"])
+  const mac = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(JSON.stringify(candidateFacts(c))))
+  return Array.from(new Uint8Array(mac)).map(b => b.toString(16).padStart(2, "0")).join("")
+}
 export const cacheGet = (key: string) => rpc("bento_cache_get", { p_key: key })
 export const cachePut = (key: string, payload: unknown) => rpc("bento_cache_put", { p_key: key, p_payload: payload })
 
