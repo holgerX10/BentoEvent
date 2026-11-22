@@ -688,6 +688,28 @@ html[data-vt="card"]::view-transition-old(root),html[data-vt="card"]::view-trans
 ::view-transition-new(card){animation:160ms 60ms var(--ease-out) both fade-in}
 ::view-transition-old(card){animation:120ms var(--ease-out) both fade-out}
 
+/* ===== Motion: one calm system. Only transform and opacity move; nothing replays on re-render. ===== */
+.progress,.rip,.ripple{display:none !important}
+.topbar{animation:none !important}
+.pressable{transition:transform 120ms var(--ease-std),opacity 160ms var(--ease-std),background-color 160ms var(--ease-std)}
+.grid .card,.grid.enter .card,.tl-item,html.io .tl-item:not(.in),html.io .grid .card:not(.in){animation:none !important;opacity:1;translate:none;transition:transform 120ms var(--ease-std)}
+.grid.reveal,.tl.reveal{animation:none}
+.hero .art,.hero h3,.fade-in > *,.chip[aria-pressed="true"],.filt-pill,.wzq{animation:none !important}
+.card.flash,.tl-item.flash{animation:land 420ms var(--ease-out) both !important}
+@keyframes land{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+.card.leaving,.tl-item.leaving{animation:leave 180ms ease-in both}
+@keyframes leave{to{opacity:0;transform:scale(.94)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+@keyframes sheet-in{from{transform:translateY(100%)}to{transform:none}}
+@keyframes sheet-out{from{transform:none}to{transform:translateY(100%)}}
+@media (max-width:639px){dialog[open] .sheet{animation:sheet-in 360ms cubic-bezier(.2,.9,.3,1) both}dialog.closing .sheet{animation:sheet-out 220ms cubic-bezier(.4,0,1,1) both}}
+dialog .scrim{transition:opacity 220ms linear}
+main.swap{animation:swap 160ms ease-out both}
+@keyframes swap{from{opacity:0}to{opacity:1}}
+@media (hover:none){.fab:hover{transform:translateY(-14px)}.fab:hover svg,.close:hover svg{transform:none}}
+.quick{grid-template-columns:minmax(0,1fr)}
+.imgo span:empty{display:none}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms !important;animation-delay:0ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
   ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none !important}
@@ -776,7 +798,7 @@ html[data-vt="card"]::view-transition-old(root),html[data-vt="card"]::view-trans
     <div class="sheet-h"><h2 id="mnTitle">Mer</h2><button type="button" class="close pressable" data-close aria-label="Stäng"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="scroll" style="gap:12px">
       <div class="rows">
-        <button type="button" class="row-btn pressable" id="mShare"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></span><span class="tx"><b>Dela</b><small>Länk, text, kort på din sajt, backup</small></span></button>
+        <button type="button" class="row-btn pressable" id="mShare"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></span><span class="tx"><b>Dela</b></span></button>
       </div>
       <div class="lbl">Utseende</div>
       <div class="seg" id="themeSeg"><button type="button" data-theme="auto">Auto</button><button type="button" data-theme="light">Ljust</button><button type="button" data-theme="dark">Mörkt</button></div>
@@ -883,7 +905,7 @@ html[data-vt="card"]::view-transition-old(root),html[data-vt="card"]::view-trans
     <div class="scroll" style="gap:14px">
       <div class="si-stage" id="siStage" data-fmt="story"><img id="siImg" alt="Förhandsvisning av delningsbilden"></div>
       <div class="seg" role="group" aria-label="Format"><button type="button" data-sifmt="story" aria-pressed="true">Story</button><button type="button" data-sifmt="feed" aria-pressed="false">Kvadrat</button></div>
-      <div class="sheet-foot" style="margin-top:0"><button type="button" class="btn ghost pressable" id="siSave" style="flex:0 0 auto">Spara bild</button><button type="button" class="btn primary pressable" id="siShare">Dela</button></div>
+      <div class="sheet-foot" style="margin-top:0"><button type="button" class="btn ghost pressable" id="siSave" style="flex:0 0 auto" aria-label="Spara bild"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v3h16v-3"/></svg></button><button type="button" class="btn ghost pressable" id="siLink" style="flex:0 0 auto" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>Länk</button><button type="button" class="btn primary pressable" id="siShare">Dela</button></div>
     </div>
   </div>
 </dialog>
@@ -896,9 +918,9 @@ html[data-vt="card"]::view-transition-old(root),html[data-vt="card"]::view-trans
     <div class="scroll">
       <div class="rows">
         <button type="button" class="row-btn pressable" data-copy="#shareUrl"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></span><span class="tx"><b>Kopiera länk</b><small id="shareHint"></small></span></button>
-        <button type="button" class="row-btn pressable" data-copy="#shareText"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></span><span class="tx"><b>Kopiera som text</b><small>Kommande kort, klart att klistra in</small></span></button>
+        <button type="button" class="row-btn pressable" data-copy="#shareText"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg></span><span class="tx"><b>Kopiera som text</b></span></button>
         <div class="acc" id="accSite">
-          <button type="button" class="row-btn pressable" data-acc="accSite" aria-expanded="false"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M14 4l-4 16"/></svg></span><span class="tx"><b>Bento-kort på din sajt<span class="beta">BETA</span></b><small>Knapp som sparar kortet hos besökaren</small></span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+          <button type="button" class="row-btn pressable" data-acc="accSite" aria-expanded="false"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M14 4l-4 16"/></svg></span><span class="tx"><b>Bento-kort på din sajt<span class="beta">BETA</span></b></span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
           <div class="acc-b"><div><div class="acc-in">
             <select id="siteSel" aria-label="Kort"></select>
             <div class="demo"><span>＋ Spara i Bento</span></div>
@@ -907,7 +929,7 @@ html[data-vt="card"]::view-transition-old(root),html[data-vt="card"]::view-trans
           </div></div></div>
         </div>
         <div class="acc" id="accBackup">
-          <button type="button" class="row-btn pressable" data-acc="accBackup" aria-expanded="false"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v3h16v-3"/></svg></span><span class="tx"><b>Backup</b><small>JSON ut och in</small></span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+          <button type="button" class="row-btn pressable" data-acc="accBackup" aria-expanded="false"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v3h16v-3"/></svg></span><span class="tx"><b>Backup</b></span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
           <div class="acc-b"><div><div class="acc-in">
             <div class="actions"><button type="button" class="btn ghost pressable" data-copy="#exportJson">Kopiera JSON</button><label class="btn ghost pressable" for="importFile">Läs in JSON<input id="importFile" type="file" accept="application/json,.json"></label></div>
           </div></div></div>
@@ -1084,7 +1106,7 @@ const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const html = document.documentElement;
 let vtRunning = null;
 function vt(kind, fn, dir){
-  if (!document.startViewTransition || reduced() || document.hidden) { fn(); return Promise.resolve(); }
+  { fn(); if (kind === 'axis' && !reduced()) { const m = document.querySelector('main'); if (m) { m.classList.remove('swap'); void m.offsetWidth; m.classList.add('swap'); } } return Promise.resolve(); }
   if (vtRunning) { try { vtRunning.skipTransition(); } catch {} }
   html.dataset.vt = kind; if (dir) html.dataset.dir = dir;
   const t = document.startViewTransition(fn); vtRunning = t;
@@ -1094,7 +1116,7 @@ function vt(kind, fn, dir){
 }
 function onAnimEnd(el, cb, timeout=600){ let done = false; const fin = e => { if (done || (e && e.target !== el)) return; done = true; el.removeEventListener('animationend', fin); cb(); }; el.addEventListener('animationend', fin); setTimeout(fin, timeout); }
 document.addEventListener('pointerdown', e => {
-  const host = e.target.closest('.pressable, .card, .tl-item, .rail-item, .chip, .btn'); if (!host || reduced() || host.disabled) return;
+  return; const host = e.target.closest('.pressable, .card, .tl-item, .rail-item, .chip, .btn'); if (!host || reduced() || host.disabled) return;
   const r = host.getBoundingClientRect(); const d = Math.max(r.width, r.height) * 2;
   const s = document.createElement('span'); s.className = 'ripple';
   s.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - r.left - d/2}px;top:${e.clientY - r.top - d/2}px`;
@@ -1178,15 +1200,15 @@ function supaUI(){
 }
 function renderAcct(confirmDel){
   const el = $('#acctBody'); const standalone = matchMedia('(display-mode: standalone)').matches;
-  const install = !standalone && deferredInstall ? `<button type="button" class="row-btn pressable" id="installBtn"><span class="ic">${ic('<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>')}</span><span class="tx"><b>Lägg på hemskärmen</b><small>Öppnas som en app och syns i dela-menyn</small></span></button>` : '';
+  const install = !standalone && deferredInstall ? `<button type="button" class="row-btn pressable" id="installBtn"><span class="ic">${ic('<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>')}</span><span class="tx"><b>Lägg på hemskärmen</b></span></button>` : '';
   if (!state.me) {
     const sent = lsGet(LS_LOGIN_EMAIL);
-    el.innerHTML = `<div class="ac-hero"><span class="ac-av big">${PERSON}</span><p>Logga in så följer korten med mellan dator och mobil, och du kan dela en lista med andra.</p></div>
+    el.innerHTML = `<div class="ac-hero"><span class="ac-av big">${PERSON}</span></div>
       ${sent ? `<div class="login-box row-btn"><span class="tx"><b>Kolla mejlen</b><small>Vi har skickat en inloggningslänk till <b>${esc(sent)}</b>. Öppna den på enheten du vill logga in på.</small></span>
         <button type="button" class="link-btn" id="codeToggle" aria-expanded="false" style="justify-self:start;padding:0">Har du en kod?</button>
         <div id="codeRow" hidden style="display:grid;gap:10px"><input id="loginCode" class="code-in" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="8" placeholder="Kod" aria-label="Kod från mejlet"><button type="button" class="btn primary pressable" id="codeBtn">Logga in</button></div>
         <small id="loginMsg" class="login-msg"></small><span class="login-links"><button type="button" class="text-btn pressable" id="resendBtn">Skicka igen</button><button type="button" class="text-btn pressable" id="otherEmail">Annan e-post</button></span></div>`
-      : `<div class="login-box row-btn"><span class="tx"><b>Logga in med e-post</b><small>Inget lösenord. Du får en länk i mejlet.</small></span><input id="loginEmail" class="ac-in" type="email" inputmode="email" autocomplete="email" placeholder="namn@mejl.se"><button type="button" class="btn primary pressable" id="loginBtn">Skicka inloggningslänk</button><small id="loginMsg" class="login-msg"></small></div>`}
+      : `<div class="login-box row-btn"><span class="tx"><b>Logga in med e-post</b><small>Du får en länk i mejlet</small></span><input id="loginEmail" class="ac-in" type="email" inputmode="email" autocomplete="email" placeholder="namn@mejl.se"><button type="button" class="btn primary pressable" id="loginBtn">Skicka inloggningslänk</button><small id="loginMsg" class="login-msg"></small></div>`}
       ${install ? `<div class="rows" style="margin-top:12px">${install}</div>` : ''}`;
     return;
   }
@@ -1203,7 +1225,7 @@ function renderAcct(confirmDel){
     <div class="lbl">${esc(supa.list.name)} · ${(supa.members || []).length} ${(supa.members || []).length === 1 ? 'person' : 'personer'}</div>
     <div class="ac-people">${people}</div>
     <div class="rows" style="margin-top:12px">
-      <button type="button" class="row-btn pressable" id="inviteBtn"><span class="ic">${ic('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>')}</span><span class="tx"><b>Bjud in</b><small>Skicka en länk. Den som öppnar den kan lägga till kort.</small></span></button>
+      <button type="button" class="row-btn pressable" id="inviteBtn"><span class="ic">${ic('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>')}</span><span class="tx"><b>Bjud in</b><small>Den som öppnar länken kan lägga till kort</small></span></button>
       ${install}
     </div>${lists}
     <div class="rows" style="margin-top:12px">
@@ -1314,20 +1336,20 @@ function renderExamples(){
   let wrap = $('#exWrap'); if (!wrap) { wrap = document.createElement('div'); wrap.id = 'exWrap'; $('#view-rutnat').insertBefore(wrap, $('#newWrap')); }
   const own = state.events.filter(e => !/^(ex|p)-/.test(e.id)).length;
   if (state.loading || !state.canWrite || own >= 10 || lsGet('bento.tips.off')) { wrap.innerHTML = ''; wrap.dataset.h = ''; return; }
-  const h = `<div class="tips-h">Tips: prova att lägga till<button type="button" class="tips-x pressable" id="tipsOff" aria-label="Dölj tipsen"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div class="exrow">${EXAMPLES.map(([k,t,x]) => `<button type="button" class="excard pressable" data-ex="${esc(x)}" style="--c:${catOf(k).c}"><span class="exi">${svgIcon(k, 16)}</span><span><b>${t}</b><small>${esc(x)}</small></span></button>`).join('')}</div>`;
+  const h = `<div class="tips-h">Prova<button type="button" class="tips-x pressable" id="tipsOff" aria-label="Dölj tipsen"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div class="exrow">${EXAMPLES.map(([k,t,x]) => `<button type="button" class="excard pressable" data-ex="${esc(x)}" style="--c:${catOf(k).c}"><span class="exi">${svgIcon(k, 16)}</span><span><b>${t}</b><small>${esc(x)}</small></span></button>`).join('')}</div>`;
   if (wrap.dataset.h !== h) { wrap.innerHTML = h; wrap.dataset.h = h; }
 }
 function renderGuest(){
   const g = $('#gcard');
   const localCount = (lsGet(LS_LOCAL) || []).length;
-  if (state.mode === 'local') { g.innerHTML = SUPA ? `<button type="button" class="gcard pressable" id="gLogin" style="width:100%;text-align:left"><span class="ic">${I.cloud}</span><span class="tx"><b>Sparas bara här</b><small>Logga in så delas ${state.events.length ? state.events.length + ' kort' : 'korten'} och följer med mellan enheter</small></span>${ic('<path d="M9 6l6 6-6 6"/>')}</button>` : `<div class="gcard"><span class="ic">${I.cloud}</span><span class="tx"><b>Sparas bara här</b><small>Öppna sidan inloggad så följer ${state.events.length ? state.events.length + ' kort' : 'korten'} med och kan delas</small></span></div>`; return; }
+  if (state.mode === 'local') { g.innerHTML = SUPA ? `<button type="button" class="gcard pressable" id="gLogin" style="width:100%;text-align:left"><span class="ic">${I.cloud}</span><span class="tx"><b>Logga in</b><small>Sparas bara här</small></span>${ic('<path d="M9 6l6 6-6 6"/>')}</button>` : `<div class="gcard"><span class="ic">${I.cloud}</span><span class="tx"><b>Sparas bara här</b></span></div>`; return; }
   g.innerHTML = '';
   if (state.mode === 'db' && state.canWrite && localCount && !state.migrateOffered) { const dis = lsGet('bento.migrate.dismissed'); if (!dis || Date.now() - dis > 7*86400000) { state.migrateOffered = true; setTimeout(openMigrate, 900); } }
 }
 function renderCount(){
   const up = state.events.filter(e => !isPast(e)).length, soon = state.events.filter(isSoon).length;
   const ct = $('#count'); const txt = state.events.length ? `${up} kommande` : ''; if (ct.textContent !== txt) { ct.textContent = txt; ct.classList.remove('swap'); void ct.offsetWidth; ct.classList.add('swap'); }
-  const nw = state.mode === 'db' ? newFromOthers().length : 0; const b = $('#soonBadge'); const v = nw ? String(nw) : soon ? String(soon) : ''; if (b.textContent !== v) b.textContent = v;
+  const nw = state.mode === 'db' ? newFromOthers().length : 0; const b = $('#soonBadge'); const v = nw ? String(nw) : ''; if (b.textContent !== v) b.textContent = v;
 }
 function renderChips(){
   const used = new Set(state.events.map(e => e.category));
@@ -1349,7 +1371,7 @@ function cardHTML(ev, i){
 function renderGrid(){
   const list = visible(), upcoming = list.filter(e => !isPast(e)), past = list.filter(isPast);
   const next = upcoming.slice(0, 6);
-  $('#railWrap').style.display = next.length ? '' : 'none';
+  $('#railWrap').style.display = upcoming.length > 2 ? '' : 'none';
   $('#railMeta').textContent = next.length ? `${next.length}` : '';
   $('#rail').innerHTML = next.map(ev => `<button type="button" class="rail-item" data-open="${ev.id}" data-id="${ev.id}" aria-label="${esc(ev.title)}">${artHTML(ev)}<span class="cd">${countdown(ev)}</span><span class="in"><span class="h">${esc(ev.title)}</span><span class="sub">${esc(shortDate(ev))}${ev.venue?` · ${esc(ev.venue)}`:''}</span></span></button>`).join('');
   const grid = $('#grid');
@@ -1394,7 +1416,7 @@ function renderTimeline(){
   let h = open.length ? `<section class="open-sec"><h2>Att boka in<small>${open.length}</small></h2><div class="open-rail">${open.map(e => { const c = catOf(e.category); return `<button type="button" class="open-item pressable" data-open="${e.id}" data-id="${e.id}"><span class="th" style="background:linear-gradient(135deg,${c.g[0]},${c.g[1]})">${okImg(e.image) ? `<img src="${e.image}" alt="" loading="lazy" onerror="this.remove()">` : ''}</span><b>${esc(e.title)}</b><small>${esc(openLbl(e))}</small></button>`; }).join('')}</div></section>` : '';
   h += `<div class="today" id="todayMark">Idag, ${nodot(fmtShort.format(new Date()))}</div>`;
   for (const [k, evs] of groups) h += `<section class="tl-month" id="m-${k}"><h2>${k === 'utan' ? 'Utan datum' : cap(fmtMonth.format(parseISO(k+'-01')))}<small>${evs.length} kort</small></h2><div class="tl-list">${evs.map(item).join('')}</div></section>`;
-  if (!upcoming.length) h += `<div class="empty" style="margin-left:-28px"><h3>Inget inbokat</h3>${open.length ? '<p>Välj en dag på något ovan så hamnar det här.</p>' : ''}</div>`;
+  if (!upcoming.length) h += `<div class="empty" style="margin-left:-28px"><h3>Inget inbokat</h3>${open.length ? '' : ''}</div>`;
   if (past.length) h += `<details class="past-wrap"><summary>Passerat (${past.length})</summary><div class="tl-list" style="margin-top:12px">${past.map(item).join('')}</div></details>`;
   tl.innerHTML = h;
   $('#monthChips').innerHTML = [...groups.keys()].map(k => `<button type="button" class="chip pressable" data-month="m-${k}" aria-pressed="false">${k === 'utan' ? 'Utan datum' : cap(nodot(fmtMon.format(parseISO(k+'-01')))) + ' ' + k.slice(2,4)}</button>`).join('');
@@ -1481,7 +1503,7 @@ function openSheet(d, from, kind){
   if (d.open) return;
   if (from && (kind || 'card') === 'card' && !from.closest('#filter')) { const ev = state.events.find(e => e.id === (from.dataset.id || from.closest('[data-id]')?.dataset.id)); from = morphSrc(from); if (from && ev) from.dataset.id = ev.id; } else if (from && from.closest('#filter')) from = null;
   d.classList.remove('closing','out','rise','prep','on');
-  const canMorph = !!from && !reduced() && !document.querySelector('dialog[open]') && from.isConnected;
+  const canMorph = false;
   d._from = canMorph ? from : null; d._kind = kind || 'card';
   if (!canMorph) { showDlg(d); return; }
   const r0 = rectOf(from); const radius0 = getComputedStyle(from).borderRadius;
@@ -1641,7 +1663,7 @@ async function renderShareImage(ev, fmt){
   const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const x = cv.getContext('2d');
   const acc = im ? accentOf(im, cat.c) : accentOf(null, cat.c), accCss = `rgb(${acc.join(',')})`, accInk = lumOf(acc) > .42 ? '#1B1512' : '#FFFFFF';
   // Backdrop: the poster, very soft, under a warm dark veil. Scaling a tiny copy up gives the blur on every browser.
-  if (im) { const t = document.createElement('canvas'); t.width = 36; t.height = Math.round(36 * h / w); cover(t.getContext('2d'), im, 0, 0, t.width, t.height); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high'; x.drawImage(t, -w * .08, -h * .08, w * 1.16, h * 1.16); x.fillStyle = 'rgba(20,16,13,.58)'; x.fillRect(0, 0, w, h); }
+  if (im) { const t = document.createElement('canvas'); t.width = 36; t.height = Math.round(36 * h / w); cover(t.getContext('2d'), im, 0, 0, t.width, t.height); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high'; x.drawImage(t, -w * .08, -h * .08, w * 1.16, h * 1.16); x.fillStyle = `rgba(20,16,13,${(.58 + Math.min(.3, lumOf(acc) * .5)).toFixed(2)})`; x.fillRect(0, 0, w, h); }
   else { const g = x.createLinearGradient(0, 0, w, h); g.addColorStop(0, '#2A2522'); g.addColorStop(1, '#171412'); x.fillStyle = g; x.fillRect(0, 0, w, h); }
   const story = fmt === 'story', R = 56, G = 24;
   const P = story ? { x: 64, y: 250, w: 952, h: 1000 } : { x: 48, y: 48, w: 560, h: 984 };
@@ -1696,12 +1718,31 @@ async function drawShare(){
   if (si.url) URL.revokeObjectURL(si.url);
   si.blob = blob; si.url = URL.createObjectURL(blob); const img = $('#siImg'); img.onload = () => st.classList.remove('busy'); img.src = si.url;
 }
-function openShareImage(ev){ si.ev = ev; si.blob = null; $('#siImg').removeAttribute('src'); openSheet($('#shimg')); drawShare(); }
+// A public page for the card (/e/<id>): general facts only, never the note or who you go with.
+async function publishCard(ev){
+  if (!SUPA) return '';
+  let image = '';
+  try { const im = await shareArt(ev); if (im) { const k = Math.min(1, 640 / Math.max(im.width, im.height)); const c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); image = c.toDataURL('image/jpeg', .72); if (image.length > 139000) image = c.toDataURL('image/jpeg', .5); } } catch {}
+  try { const { data, error } = await SUPA.rpc('bento_publish', { p: { title: ev.title, category: ev.category, date: ev.date || '', endDate: ev.endDate || '', time: ev.time || '', venue: ev.venue || '', city: ev.city || '', url: /^https:\/\//.test(ev.url || '') ? ev.url : '', image } }); if (error || !data) return ''; return `${location.origin}/e/${data}`; } catch { return ''; }
+}
+function openShareImage(ev){ si.ev = ev; si.blob = null; si.link = ''; $('#siLink').hidden = true; $('#siImg').removeAttribute('src'); openSheet($('#shimg')); drawShare(); publishCard(ev).then(u => { if (si.ev === ev && u) { si.link = u; $('#siLink').hidden = false; } }); }
+async function savePublic(id){
+  if (!SUPA || !/^[a-f0-9]{12}$/.test(id)) return;
+  try {
+    const { data: p } = await SUPA.rpc('bento_public_get', { p_id: id }); if (!p || !p.title) { toast('Kortet finns inte kvar'); return; }
+    const dup = state.events.find(e => e.title === p.title && (e.date || '') === (p.date || ''));
+    if (dup) { openDetail(dup.id); return; }
+    const now = new Date().toISOString();
+    const ev = { id: crypto.randomUUID(), title: p.title, category: CATS[p.category] ? p.category : 'annat', date: p.date || '', dateKind: p.date ? 'exakt' : '', time: p.time || '', endDate: p.endDate || '', venue: p.venue || '', city: p.city || '', url: p.url || '', note: '', size: 's', image: p.image || '', by: state.me || '', ticket: '', with: '', claimBy: '', createdAt: now, updatedAt: now };
+    await store.save(ev); toast('Sparat'); setTimeout(() => openDetail(ev.id), 300);
+    const seen = lsGet('bento.pub.saved') || []; if (!seen.includes(id)) { seen.push(id); lsSet('bento.pub.saved', seen.slice(-200)); SUPA.rpc('bento_public_saved', { p_id: id }).then(() => {}, () => {}); }
+  } catch { toast('Gick inte att spara'); }
+}
 const shareFile = () => new File([si.blob], `bento-${String(si.ev.title).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'kort'}.jpg`, { type: 'image/jpeg' });
 function saveShareImage(){ if (!si.blob) return; const a = document.createElement('a'); a.href = si.url; a.download = shareFile().name; document.body.appendChild(a); a.click(); a.remove(); toast('Bilden sparad'); }
 async function sendShareImage(){
   if (!si.blob) return; const f = shareFile(), ev = si.ev;
-  if (navigator.canShare && navigator.canShare({ files: [f] })) { try { await navigator.share({ files: [f], title: ev.title, text: [ev.title, ev.date ? dateLine(ev) : '', ev.url || ''].filter(Boolean).join(' · ') }); } catch (e) { if (e && e.name !== 'AbortError') saveShareImage(); } }
+  if (navigator.canShare && navigator.canShare({ files: [f] })) { try { await navigator.share({ files: [f], title: ev.title, text: [ev.title, ev.date ? dateLine(ev) : '', si.link || ev.url || ''].filter(Boolean).join(' · ') }); } catch (e) { if (e && e.name !== 'AbortError') saveShareImage(); } }
   else saveShareImage();
 }
 
@@ -1767,7 +1808,7 @@ const wz = {
   },
   candDate(c){ const k = c.dateKind; if (!c.date) return c.endDate ? `spelas t.o.m. ${dayLabel(c.endDate)}` : 'datum inte satt'; return (k === 'fran' ? 'premiär ' : k === 'period' ? 'från ' : '') + dayLabel(c.date) + (c.time ? ` ${c.time}` : '') + (k === 'period' && c.endDate ? ` – ${dayLabel(c.endDate)}` : ''); },
   showPick(){
-    this.setStage('pick');
+    this.setStage('pick'); $('#wzq').innerHTML = '';
     const own = draft._own && draft._own.image;
     const idx = this.cands.map((c, i) => i);
     let best = idx.filter(i => this.cands[i].match); if (!best.length) best = [0];
@@ -1785,7 +1826,7 @@ const wz = {
       const keepPhoto = draft._own;
       Object.assign(draft, { title: c.title, category: CATS[c.category] ? c.category : draft.category, venue: c.venue || draft.venue || '', city: c.city || draft.city || '', date: c.date || '', dateKind: c.dateKind || (c.date ? 'exakt' : ''), endDate: c.endDate || '', time: c.time || draft.time || '', url: c.url || draft.url || '', note: c.note || draft.note || '' });
       draft._dates = (c.dates || []).filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d) && d >= iso(new Date()));
-      draft._images = (c.images || []).filter(u => /^https:\/\//.test(u));
+      draft._images = [...new Set((c.images || []).filter(u => /^https:\/\//.test(u)))].slice(0, 2);
       if (draft.category === 'resa') { if (/visit|tourism|turism|tripadvisor|wikipedia/i.test(draft.url)) draft.url = ''; if (draft.date && draft.endDate) draft.dateKind = 'exakt'; draft.note = ''; }
       if (!keepPhoto && draft._images[0]) this.useImage(draft._images[0]);
     }
@@ -1800,7 +1841,7 @@ const wz = {
     st.push('when', 'ticket', 'with');
     this.steps = st; this.step = 0; this.setStage('ask'); $('#wz').innerHTML = ''; renderPreview(true); this.renderQ();
   },
-  next(){ this.step++; if (this.step >= this.steps.length) { this.setStage('done'); $('#wzq').innerHTML = `<div class="wz-top"><button type="button" class="wz-back pressable" id="wzBack" aria-label="Tillbaka">${ic('<path d="M15 6l-6 6 6 6"/>')}</button></div><p class="wz-done">${I.check}Klart att spara</p>`; $('#moreBtn').style.display = 'flex'; return; } this.renderQ(); },
+  next(){ this.step++; if (this.step >= this.steps.length) { this.setStage('done'); $('#wzq').innerHTML = `<div class="wz-top"><button type="button" class="wz-back pressable" id="wzBack" aria-label="Tillbaka">${ic('<path d="M15 6l-6 6 6 6"/>')}</button></div>`; $('#moreBtn').style.display = 'flex'; return; } this.renderQ(); },
   back(){ if (this.stage === 'done') { this.setStage('ask'); this.step = this.steps.length - 1; this.renderQ(); return; } if (this.step > 0) { this.step--; this.renderQ(); } else if (this.cands.length) this.showPick(); else this.reset(); },
   renderQ(){
     const k = this.steps[this.step]; const dots = `<div class="wz-top"><button type="button" class="wz-back pressable" id="wzBack" aria-label="Tillbaka">${ic('<path d="M15 6l-6 6 6 6"/>')}</button><div class="dots">${this.steps.map((_, i) => `<i class="${i <= this.step ? 'on' : ''}"></i>`).join('')}</div></div>`;
@@ -1808,7 +1849,7 @@ const wz = {
     if (k === 'what') { q = draft._askVenue ? `Vad ska du se på ${esc(draft._askVenue)}?` : 'Vad heter det?'; body = `<div class="wz-in"><input id="wzWhat" maxlength="90" placeholder="Titel" value="${draft._askVenue ? '' : esc(draft.title || '')}"><button type="button" class="btn primary pressable" id="wzWhatOk" style="flex:0 0 auto">OK</button></div>`; }
     if (k === 'img') {
       q = 'Vilken bild?'; const own = draft._own && draft._own.image; const cur = draft._imgPick || (own ? 'own' : '0');
-      body = `<div class="imgs">${own ? `<button type="button" class="imgo pressable" data-img="own" aria-pressed="${cur === 'own'}"><img src="${own}" alt=""><span>Ditt foto</span></button>` : ''}${draft._images.map((u, i) => `<button type="button" class="imgo pressable" data-img="${i}" aria-pressed="${cur === String(i)}"><img src="${esc(u)}" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"><span>Original</span></button>`).join('')}<button type="button" class="imgo flat pressable" data-img="none" aria-pressed="${cur === 'none'}" style="background:linear-gradient(135deg,${catOf(draft.category).g[0]},${catOf(draft.category).g[1]})">Ingen bild</button></div>`;
+      body = `<div class="imgs">${own ? `<button type="button" class="imgo pressable" data-img="own" aria-pressed="${cur === 'own'}"><img src="${own}" alt=""><span>Ditt foto</span></button>` : ''}${draft._images.map((u, i) => `<button type="button" class="imgo pressable" data-img="${i}" aria-pressed="${cur === String(i)}"><img src="${esc(u)}" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.remove()"></button>`).join('')}<button type="button" class="imgo flat pressable" data-img="none" aria-pressed="${cur === 'none'}" style="background:linear-gradient(135deg,${catOf(draft.category).g[0]},${catOf(draft.category).g[1]})">Ingen bild</button></div>`;
     }
     if (k === 'when') {
       const today = iso(new Date()); const opts = []; const kind = draft.dateKind;
@@ -2144,12 +2185,12 @@ function renderFindRes(){
   const el = $('#findRes'); if (!el) return; const q = state.q.trim();
   if (!q) { el.innerHTML = ''; return; }
   const list = visible().slice(0, 8);
-  el.innerHTML = list.length ? list.map(ev => { const c = catOf(ev.category); return `<button type="button" class="fres pressable" data-open="${ev.id}"><span class="th" style="background:linear-gradient(135deg,${c.g[0]},${c.g[1]})">${okImg(ev.image) ? `<img src="${ev.image}" alt="" onerror="this.remove()">` : svgIcon(ev.category, 18)}</span><span class="tx"><b>${esc(ev.title)}</b><small>${esc(shortDate(ev))}${ev.venue ? ' · ' + esc(ev.venue) : ''}</small></span></button>`; }).join('') : `<p class="fres-none">Inget kort matchar ”${esc(q)}”.</p>`;
+  el.innerHTML = list.length ? list.map(ev => { const c = catOf(ev.category); return `<button type="button" class="fres pressable" data-open="${ev.id}"><span class="th" style="background:linear-gradient(135deg,${c.g[0]},${c.g[1]})">${okImg(ev.image) ? `<img src="${ev.image}" alt="" onerror="this.remove()">` : svgIcon(ev.category, 18)}</span><span class="tx"><b>${esc(ev.title)}</b><small>${esc(shortDate(ev))}${ev.venue ? ' · ' + esc(ev.venue) : ''}</small></span></button>`; }).join('') : `<button type="button" class="btn ghost pressable" id="addFromQ" style="width:100%">${ic('<path d="M12 5v14M5 12h14"/>')}Lägg till ”${esc(q)}”</button>`;
 }
 /* ---------- Mer ---------- */
 const LS_THEME = 'bento.theme';
 function setTheme(v){ if (v === 'auto' || !v) { html.removeAttribute('data-theme'); } else html.dataset.theme = v; lsSet(LS_THEME, v || 'auto'); document.querySelectorAll('#themeSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.theme === (v || 'auto')))); }
-function openMenu(fromEl){ setTheme(lsGet(LS_THEME) || 'auto'); $('#about').textContent = `Bento · ${state.events.length} kort · ${state.mode === 'db' ? 'delad lista' : 'sparas i den här webbläsaren'}`; openSheet($('#menu'), fromEl, 'fab'); }
+function openMenu(fromEl){ setTheme(lsGet(LS_THEME) || 'auto'); $('#about').textContent = ''; openSheet($('#menu'), fromEl, 'fab'); }
 
 /* ---------- Toast ---------- */
 let toastT, toastOnAct = null;
@@ -2233,15 +2274,17 @@ document.addEventListener('click', e => {
   else if (t.dataset.claim) { const ev = state.events.find(e => e.id === currentId); patchEvent(currentId, { claimBy: ev && ev.claimBy === state.me ? '' : (state.me || 'me') }); }
   else if (t.id === 'withSave') { patchEvent(currentId, { with: $('#withIn').value.trim() }); }
   else if (t.id === 'addPhoto') { $('#dmenu').classList.remove('on'); const ev = state.events.find(e => e.id === currentId); if (ev) { openEditor(ev); setTimeout(() => { picking = true; setTimeout(() => { picking = false; }, 60000); $('#f-img').click(); }, 450); } }
-  else if (t.dataset.ex) { openEditor(null, t); setTimeout(() => { $('#paste').value = t.dataset.ex; applyQuick(); }, 500); }
+  else if (t.dataset.ex) { openEditor(null, t); setTimeout(() => { $('#paste').value = t.dataset.ex; $('#findBtn').hidden = false; wz.find(); }, 380); }
   else if (t.id === 'editBtn') { $('#dmenu').classList.remove('on'); const ev = state.events.find(x => x.id === currentId); if (ev) openEditor(ev); }
   else if (t.id === 'delBtn') { $('#dmenu').classList.remove('on'); $('#confirm').classList.add('on'); $('#confirm').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
   else if (t.id === 'delNo') $('#confirm').classList.remove('on');
   else if (t.id === 'delYes') { const id = currentId; closeSheet($('#detail'), true); removeCard([id]); }
+  else if (t.id === 'addFromQ') { const q = state.q.trim(); state.q = ''; const qi = $('#q'); if (qi) qi.value = ''; closeSheet($('#filter'), true); render(); setTimeout(() => { openEditor(null); setTimeout(() => { $('#paste').value = q; $('#findBtn').hidden = false; wz.find(); }, 380); }, 260); }
   else if (t.id === 'shareBtn') { $('#dmenu').classList.remove('on'); const ev = state.events.find(x => x.id === currentId); if (ev) openShareImage(ev); }
   else if (t.dataset.sifmt) { if (si.fmt !== t.dataset.sifmt) { si.fmt = t.dataset.sifmt; drawShare(); } }
   else if (t.id === 'siShare') sendShareImage();
   else if (t.id === 'siSave') saveShareImage();
+  else if (t.id === 'siLink') { if (si.link) navigator.clipboard.writeText(si.link).then(() => toast('Länk kopierad')).catch(() => toast(si.link)); }
   else if (t.id === 'copyCard') { $('#dmenu').classList.remove('on'); const ev = state.events.find(x => x.id === currentId); if (ev) navigator.clipboard.writeText(cardText(ev)).then(() => toast('Kopierat')).catch(() => toast('Kunde inte kopiera')); }
   else if (t.id === 'imgClear') { draft.image = ''; draft.imageBlob = null; renderImgPrev(); renderPreview(true); }
   else if (t.id === 'noDate') { draft.noDate = true; draft.date = ''; $('#form').requestSubmit(); }
@@ -2291,6 +2334,7 @@ new ResizeObserver(measure).observe(topbar); measure();
 /* ---------- Boot ---------- */
 setTheme(lsGet(LS_THEME) || 'auto');
 const qs = new URLSearchParams(location.search);
+if (qs.get('save')) { const sid = qs.get('save'); history.replaceState(null, '', location.pathname + location.hash); const go = (n = 0) => { if (state.loading && n < 40) return setTimeout(() => go(n + 1), 150); savePublic(sid); }; setTimeout(go, 400); }
 if (qs.get('join')) { lsSet(LS_JOIN, qs.get('join')); history.replaceState(null, '', location.pathname + location.hash); if (SUPA) setTimeout(async () => { const { data: { session } } = await SUPA.auth.getSession(); if (!session) { toast('Logga in för att gå med i listan', { ms: 4000 }); openAcct(); } }, 900); }
 const sharedIn = qs.get('share') === '1' || qs.get('text') || qs.get('url') || qs.get('title');
 if (sharedIn) history.replaceState(null, '', location.pathname + location.hash);

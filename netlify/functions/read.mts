@@ -37,4 +37,5 @@ export default async (req: Request) => {
   if (!out) return Response.json({ error: "upstream" }, { status: 502 })
   return Response.json(out)
 }
-export const config: Config = { path: "/api/read", method: ["POST"] }
+// At most 12 calls per IP in three minutes; Netlify answers 429 above that.
+export const config: Config = { path: "/api/read", method: ["POST"], rateLimit: { windowLimit: 12, windowSize: 180, aggregateBy: ["ip", "domain"] } }

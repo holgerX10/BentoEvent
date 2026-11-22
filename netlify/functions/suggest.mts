@@ -105,4 +105,5 @@ Högst ${complete ? 2 : 5} kandidater, matchningar först. note bara om det är 
   return Response.json({ ...payload, source: "ai" })
 }
 
-export const config: Config = { path: "/api/suggest", method: ["POST"] }
+// At most 12 calls per IP in three minutes; Netlify answers 429 above that.
+export const config: Config = { path: "/api/suggest", method: ["POST"], rateLimit: { windowLimit: 12, windowSize: 180, aggregateBy: ["ip", "domain"] } }

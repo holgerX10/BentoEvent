@@ -46,7 +46,7 @@ function dateFromText(text: string) {
   if (!m) return ""
   const d = +m[1], mo = MONTHS[m[2].toLowerCase().slice(0, 3)], now = new Date()
   let y = m[3] ? +m[3] : now.getFullYear()
-  if (!m[3]) { const cand = new Date(y, mo - 1, d); if (cand.getTime() < now.getTime() - 86400000) y++ }
+  if (!m[3]) { const age = now.getTime() - new Date(y, mo - 1, d).getTime(); if (age > 60 * 86400000) y++; else if (age > 86400000) return "" }
   return `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`
 }
 
@@ -68,7 +68,7 @@ export default async (req: Request) => {
   const ogTitle = meta(html, "og:title") || meta(html, "twitter:title") || decode((html.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [, ""])[1] || "")
   const title = (ld.title || ogTitle).replace(/\s*[|–-]\s*[^|–-]{2,40}$/, "").trim()
   const text = html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ")
-  const date = ld.date || isoDate(meta(html, "event:start_time")) || dateFromText(meta(html, "og:description") + " " + text.slice(0, 20000))
+  const date = ld.date || isoDate(meta(html, "event:start_time")) || (target.pathname.replace(/\/+$/, "") ? dateFromText(meta(html, "og:description") + " " + text.slice(0, 20000)) : "")
   const body = {
     url: u, title, date, time: ld.time || "", endDate: ld.endDate || "", venue: ld.venue || "", city: ld.city || "",
     image: ld.image || meta(html, "og:image") || meta(html, "twitter:image") || "",
@@ -79,4 +79,5 @@ export default async (req: Request) => {
   return Response.json(body, { headers: { "cache-control": "public, max-age=3600" } })
 }
 
-export const config: Config = { path: "/api/peek", method: ["GET"] }
+// At most 40 calls per IP in three minutes; Netlify answers 429 above that.
+export const config: Config = { path: "/api/peek", method: ["GET"], rateLimit: { windowLimit: 40, windowSize: 180, aggregateBy: ["ip", "domain"] } }
