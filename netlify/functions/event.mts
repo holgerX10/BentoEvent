@@ -22,8 +22,9 @@ async function load(id: string) {
 }
 
 const page = (body: string, head = "", status = 200) => new Response(`<!doctype html><html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex"><meta name="theme-color" content="#171412"><link rel="icon" href="/icon.svg" type="image/svg+xml">${head}
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+<link rel="preload" href="/fonts/outfit.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+@font-face{font-family:"Manrope";src:url("/fonts/manrope.woff2") format("woff2");font-weight:200 800;font-display:swap}@font-face{font-family:"Outfit";src:url("/fonts/outfit.woff2") format("woff2");font-weight:100 900;font-display:swap}
 *{box-sizing:border-box}html,body{margin:0}body{min-height:100dvh;background:#171412;color:#F6EEE4;font-family:Manrope,system-ui,sans-serif;display:grid;place-items:center;padding:20px 16px calc(20px + env(safe-area-inset-bottom))}
 main{width:100%;max-width:420px;display:grid;gap:10px;animation:in 420ms cubic-bezier(.2,.9,.3,1) both}@keyframes in{from{opacity:0;transform:translateY(16px)}}
 .p{aspect-ratio:1/1.02;border-radius:28px;overflow:hidden;position:relative;display:flex;align-items:flex-end;padding:24px}

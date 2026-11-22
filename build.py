@@ -9,5 +9,7 @@ assert src.count('<script>\n(() => {') == 1
 out = src.replace('<script>\n(() => {', cfg + '(() => {', 1)
 out = out.replace('<link rel="manifest" href="manifest.webmanifest">', '<link rel="manifest" href="/manifest.webmanifest">')
 out = out.replace('<link rel="icon" href="icon.svg" type="image/svg+xml">\n<link rel="apple-touch-icon" href="icon.svg">', '<link rel="icon" href="/icon.svg" type="image/svg+xml">\n<link rel="apple-touch-icon" href="/icon-192.png">')
+out = out.replace('href="fonts/', 'href="/fonts/').replace('url("fonts/', 'url("/fonts/').replace("sc.src = 'vendor/jsqr.js'", "sc.src = '/vendor/jsqr.js'")
+assert 'fonts.googleapis' not in out and 'cdnjs' not in out
 pathlib.Path('public/index.html').write_text(out)
 print('built', len(out))

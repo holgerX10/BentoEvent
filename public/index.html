@@ -13,10 +13,13 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="preload" href="/fonts/outfit.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+/* Typefaces are served from Bento's own address (SIL Open Font License), so no visitor data goes to a font host. */
+@font-face{font-family:"Manrope";src:url("/fonts/manrope.woff2") format("woff2");font-weight:200 800;font-style:normal;font-display:swap}
+@font-face{font-family:"Outfit";src:url("/fonts/outfit.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
+@font-face{font-family:"JetBrains Mono";src:url("/fonts/jetbrains-mono.woff2") format("woff2");font-weight:100 800;font-style:normal;font-display:swap}
 /* ============ Tokens (Bento design system) ============
    App shell: fixed top bar + bottom nav, content between. Peach is the one interaction
    signal. Spatial model: tabs move on the x-axis, sheets rise from the bottom, cards and
@@ -1397,6 +1400,20 @@ function cardHTML(ev, i){
     <span class="chk">${state.sel && state.sel.has(ev.id) ? I.check : ''}</span>
   </button>`;
 }
+// Keyed FLIP: remember where each card was, and let it glide to where it ends up.
+function flipSnap(root){
+  if (reduced() || state.firstPaint || vtRunning || !root.offsetParent) return null;
+  const m = new Map(); root.querySelectorAll('.card[data-id]').forEach(el => { const r = el.getBoundingClientRect(); if (r.bottom > -200 && r.top < innerHeight + 200) m.set(el.dataset.id, r); });
+  return m.size && m.size <= 40 ? m : null;
+}
+function flipPlay(root, before){
+  if (!before) return;
+  root.querySelectorAll('.card[data-id]').forEach(el => {
+    const a = before.get(el.dataset.id); if (!a) return; const b = el.getBoundingClientRect(), dx = a.left - b.left, dy = a.top - b.top;
+    if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+    el.animate([{ transform: `translate(${dx}px,${dy}px)` }, { transform: 'none' }], { duration: 300, easing: 'cubic-bezier(.23,1,.32,1)' });
+  });
+}
 function renderGrid(){
   const list = visible(), upcoming = list.filter(e => !isPast(e)), past = list.filter(isPast);
   const next = upcoming.slice(0, 6);
@@ -1408,13 +1425,13 @@ function renderGrid(){
   $('#gridHead').style.display = list.length ? '' : 'none';
   if (!list.length) { grid.innerHTML = state.loading ? '<div class="skel"><i></i><i></i><i></i><i></i><i></i></div>' : ''; grid.style.display = state.loading ? 'block' : 'none'; showEmpty(grid.parentElement, !state.loading); if (state.loading) state.wasLoading = true; return; }
   showEmpty(grid.parentElement, false); grid.style.display = '';
-  let i = 0;
+  let i = 0; const before = flipSnap(grid);
   grid.innerHTML = upcoming.map(ev => cardHTML(ev, i++)).join('') +
     (state.canWrite ? `<button type="button" class="card add" id="addCard" style="--i:${Math.min(i++,12)}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nytt</button>` : '') +
     past.map(ev => cardHTML(ev, i++)).join('');
   if (state.firstPaint) { state.firstPaint = false; grid.classList.add('enter'); setTimeout(() => grid.classList.remove('enter'), 1200); }
   if (state.wasLoading) { state.wasLoading = false; grid.classList.add('reveal'); setTimeout(() => grid.classList.remove('reveal'), 500); }
-  observeReveal(grid.querySelectorAll('.card'));
+  observeReveal(grid.querySelectorAll('.card')); flipPlay(grid, before);
 }
 function showEmpty(parent, on){
   let e = parent.querySelector('.empty');
@@ -1719,7 +1736,7 @@ async function renderShareImage(ev, fmt){
   try { await Promise.all(['800 80px Outfit', '700 40px Manrope', '600 30px "JetBrains Mono"'].map(f => document.fonts.load(f))); } catch {}
   const im = await shareArt(ev);
   const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const x = cv.getContext('2d');
-  const acc = im ? accentOf(im, cat.c) : accentOf(null, cat.c), accCss = `rgb(${acc.join(',')})`, accInk = lumOf(acc) > .42 ? '#1B1512' : '#FFFFFF';
+  const acc = im ? accentOf(im, cat.c) : accentOf(null, cat.c), accCss = `rgb(${acc.join(',')})`, accInk = (lumOf(acc) + .05) / (lumOf([27, 21, 18]) + .05) > 1.05 / (lumOf(acc) + .05) ? '#1B1512' : '#FFFFFF';
   // Backdrop: the poster, very soft, under a warm dark veil. Scaling a tiny copy up gives the blur on every browser.
   if (im) { const t = document.createElement('canvas'); t.width = 36; t.height = Math.round(36 * h / w); cover(t.getContext('2d'), im, 0, 0, t.width, t.height); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high'; x.drawImage(t, -w * .08, -h * .08, w * 1.16, h * 1.16); x.fillStyle = `rgba(20,16,13,${(.58 + Math.min(.3, lumOf(acc) * .5)).toFixed(2)})`; x.fillRect(0, 0, w, h); }
   else { const g = x.createLinearGradient(0, 0, w, h); g.addColorStop(0, '#2A2522'); g.addColorStop(1, '#171412'); x.fillStyle = g; x.fillRect(0, 0, w, h); }
@@ -2034,7 +2051,7 @@ function trimUniform(img){
 function cvToDataUrl(cv, maxLen=170000){ if (!cv.width || !cv.height) return ''; let q = 0.82, out = cv.toDataURL('image/jpeg', q); while (out.length > maxLen && q > 0.4) { q -= 0.1; out = cv.toDataURL('image/jpeg', q); } return out; }
 const cvToBlob = (cv, q=0.86) => new Promise(res => cv.toBlob(res, 'image/jpeg', q));
 let jsqrP = null;
-function loadJsQR(){ if (window.jsQR) return Promise.resolve(window.jsQR); if (jsqrP) return jsqrP; jsqrP = new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js'; sc.onload = () => res(window.jsQR); sc.onerror = () => rej(new Error('jsqr')); document.head.appendChild(sc); }); return jsqrP; }
+function loadJsQR(){ if (window.jsQR) return Promise.resolve(window.jsQR); if (jsqrP) return jsqrP; jsqrP = new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = '/vendor/jsqr.js'; sc.onload = () => res(window.jsQR); sc.onerror = () => rej(new Error('jsqr')); document.head.appendChild(sc); }); return jsqrP; }
 async function readQR(img){
   const jsQR = await loadJsQR(); if (!jsQR) return null;
   for (const max of [1000, 1600]) { const cv = drawCrop(img, null, max); const ctx = cv.getContext('2d'); const d = ctx.getImageData(0, 0, cv.width, cv.height); const code = jsQR(d.data, cv.width, cv.height, { inversionAttempts: 'attemptBoth' }); if (code && code.data) { const t = code.data.trim(); const m = t.match(/https?:\/\/\S+/i); if (m) return m[0]; if (/^[\w.-]+\.[a-z]{2,}(\/\S*)?$/i.test(t)) return 'https://' + t; return null; } }
