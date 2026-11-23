@@ -773,6 +773,7 @@ dialog.vt .scrim{opacity:1;transition:none}
     <div id="railWrap"><div class="section-h"><h2>Närmast</h2><span class="meta" id="railMeta"></span></div><div class="rail" id="rail"></div></div>
     <div class="section-h" id="gridHead"><h2>Alla kort</h2><span class="meta" id="gridMeta"></span></div>
     <div class="grid" id="grid"></div>
+    <div id="gridPast"></div>
   </section>
   <section class="view" id="view-tidslinje" aria-label="Tidslinje">
     <div class="monthbar"><div class="mrow"><button type="button" class="chip pressable" id="todayBtn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>Idag</button><div class="chips" id="monthChips" role="group" aria-label="Månad"></div></div></div>
@@ -1058,11 +1059,13 @@ const WD = {måndag:1,mån:1,tisdag:2,tis:2,onsdag:3,ons:3,torsdag:4,tors:4,fred
 const VENUES = ['Berwaldhallen','Konserthuset','Dramaten','Kulturhuset','Stadsteatern','Avicii Arena','Globen','Tele2 Arena','Friends Arena','Strawberry Arena','Hovet','Annexet','Filmstaden','Göta Lejon','Cirkus','Debaser','Fållan','Nalen','Södra Teatern','Oscarsteatern','Operan','Kungliga Operan','Folkoperan','Rival','Fotografiska','Scalateatern','Nationalmuseum','Moderna Museet','Gröna Lund','Skansen','Ullevi','Scandinavium','Liseberg','Malmö Live','Malmö Arena','Uppsala Konsert & Kongress','Slottsskogen','Waterfront','Münchenbryggeriet','Slaktkyrkan','Trädgården','Fasching','Konserthuset Göteborg','Oaxen Slip','Fotografiska'];
 const CITIES = ['Stockholm','Göteborg','Malmö','Uppsala','Lund','Linköping','Örebro','Västerås','Helsingborg','Norrköping','Umeå','Luleå','Visby','Köpenhamn','Copenhagen','Oslo','Helsingfors','Helsinki','London','Berlin','Paris','Amsterdam','Barcelona','Rom','Roma','New York','Lissabon','Madrid','Wien','Prag','Reykjavik','Tallinn','Riga'];
 const DOMAIN_HINTS = [[/dramaten/,'Dramaten','teater'],[/filmstaden|sf\.se|biografcentralen|bio\.se/,'Filmstaden','bio'],[/berwaldhallen|sverigesradio\.se\/berwald/,'Berwaldhallen','konsert'],[/konserthuset/,'Konserthuset','konsert'],[/operan\.se/,'Kungliga Operan','teater'],[/stadsteatern|kulturhuset/,'Kulturhuset Stadsteatern','teater'],[/ticketmaster|tickster|biljettkiosken|axs|eventim|nortic|billetto/,'','konsert'],[/sas\.se|flysas|norwegian|ryanair|sj\.se|snalltaget|vy\.se|booking\.com|airbnb|hotels\.com|expedia/,'','resa'],[/hammarby|aik|dif\.se|svenskfotboll|shl\.se/,'','sport'],[/thefork|bokabord|quandoo|restaurang/,'','mat'],[/live.?nation|luger|debaser|fasching|nalen|slaktkyrkan|fallan|trädgården|tradgarden/,'','konsert']];
-function nextYearFor(m, d, y){
+const RUNNING_RE = /premi[äa]r|pågår|går nu|går redan|sedan|redan|spelas|visas|öppnade|hade/i;
+function nextYearFor(m, d, y, running){
   const now = parseISO(todayISO());
   if (y) return y < 100 ? 2000 + y : y;
   let cand = new Date(now.getFullYear(), m-1, d);
-  if (cand < now && (now - cand) > 86400000 * 2) cand = new Date(now.getFullYear()+1, m-1, d);
+  // A premiere or something already running keeps its real, passed date (up to five months back); everything else means the next time the date comes round.
+  if (cand < now && (now - cand) > 86400000 * 2 && !(running && (now - cand) < 86400000 * 150)) cand = new Date(now.getFullYear()+1, m-1, d);
   return cand.getFullYear();
 }
 function mkDate(y,m,d){ const dt = new Date(y,m-1,d); return isNaN(dt) ? null : iso(dt); }
@@ -1074,13 +1077,13 @@ function parseDates(text){
   }
   const re1 = new RegExp(`\\b(\\d{1,2})(?:\\s*[–\\-]\\s*(\\d{1,2}))?\\.?\\s*(${MON_RE})\\.?(?:\\s+(\\d{4}))?\\b`, 'i');
   if ((m = re1.exec(t))) {
-    const mo = MONTHS[m[3].toLowerCase()], y = nextYearFor(mo, +m[1], m[4] ? +m[4] : 0);
+    const mo = MONTHS[m[3].toLowerCase()], y = nextYearFor(mo, +m[1], m[4] ? +m[4] : 0, RUNNING_RE.test(t));
     out.date = mkDate(y, mo, +m[1]); if (m[2]) out.endDate = mkDate(y, mo, +m[2]); out.hits.push(m[0]);
     const re2 = new RegExp(`[–\\-]\\s*(\\d{1,2})\\.?\\s*(${MON_RE})\\.?`, 'i'); const m2 = re2.exec(t.slice(m.index + m[0].length, m.index + m[0].length + 24));
     if (m2 && !m[2]) { out.endDate = mkDate(y, MONTHS[m2[2].toLowerCase()], +m2[1]); out.hits.push(m2[0]); }
     return out;
   }
-  if ((m = /\b(\d{1,2})\/(\d{1,2})(?:[\/\-](\d{2,4}))?\b/.exec(t))) { const y = nextYearFor(+m[2], +m[1], m[3] ? +m[3] : 0); out.date = mkDate(y,+m[2],+m[1]); out.hits.push(m[0]); return out; }
+  if ((m = /\b(\d{1,2})\/(\d{1,2})(?:[\/\-](\d{2,4}))?\b/.exec(t))) { const y = nextYearFor(+m[2], +m[1], m[3] ? +m[3] : 0, RUNNING_RE.test(t)); out.date = mkDate(y,+m[2],+m[1]); out.hits.push(m[0]); return out; }
   const now = parseISO(todayISO());
   if ((m = /\b(idag|imorgon|i övermorgon)\b/i.exec(t))) { const add = {idag:0,imorgon:1,'i övermorgon':2}[m[1].toLowerCase()]; now.setDate(now.getDate()+add); out.date = iso(now); out.hits.push(m[0]); return out; }
   const wdRe = new RegExp(`\\b(?:på |nästa )?(${Object.keys(WD).join('|')})\\b`, 'i');
@@ -1419,14 +1422,15 @@ function renderGrid(){
   $('#railMeta').textContent = next.length ? `${next.length}` : '';
   $('#rail').innerHTML = next.map(ev => `<button type="button" class="rail-item" data-open="${ev.id}" data-id="${ev.id}" aria-label="${esc(ev.title)}">${artHTML(ev)}<span class="cd">${countdown(ev)}</span><span class="in"><span class="h">${esc(ev.title)}</span><span class="sub">${esc(shortDate(ev))}${ev.venue?` · ${esc(ev.venue)}`:''}</span></span></button>`).join('');
   const grid = $('#grid');
-  $('#gridMeta').textContent = list.length ? `${upcoming.length} kommande${past.length?` · ${past.length} passerade`:''}` : '';
+  $('#gridMeta').textContent = upcoming.length ? `${upcoming.length} kommande` : '';
   $('#gridHead').style.display = list.length ? '' : 'none';
   if (!list.length) { grid.innerHTML = state.loading ? '<div class="skel"><i></i><i></i><i></i><i></i><i></i></div>' : ''; grid.style.display = state.loading ? 'block' : 'none'; showEmpty(grid.parentElement, !state.loading); if (state.loading) state.wasLoading = true; return; }
   showEmpty(grid.parentElement, false); grid.style.display = '';
   let i = 0; const before = flipSnap(grid);
   grid.innerHTML = upcoming.map(ev => cardHTML(ev, i++)).join('') +
     (state.canWrite ? `<button type="button" class="card add" id="addCard" style="--i:${Math.min(i++,12)}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nytt</button>` : '') +
-    past.map(ev => cardHTML(ev, i++)).join('');
+'';
+  $('#gridPast').innerHTML = past.length ? `<details class="past-wrap" id="pastFold"${state.pastOpen ? ' open' : ''}><summary>Varit (${past.length})</summary><div class="grid" style="margin-top:12px">${past.slice().reverse().map(ev => cardHTML(ev, 0)).join('')}</div></details>` : '';
   if (state.firstPaint) { state.firstPaint = false; grid.classList.add('enter'); setTimeout(() => grid.classList.remove('enter'), 1200); }
   if (state.wasLoading) { state.wasLoading = false; grid.classList.add('reveal'); setTimeout(() => grid.classList.remove('reveal'), 500); }
   observeReveal(grid.querySelectorAll('.card')); flipPlay(grid, before);
@@ -1461,7 +1465,7 @@ function renderTimeline(){
   h += `<div class="today" id="todayMark">Idag, ${nodot(fmtShort.format(new Date()))}</div>`;
   for (const [k, evs] of groups) h += `<section class="tl-month" id="m-${k}"><h2>${k === 'utan' ? 'Utan datum' : cap(fmtMonth.format(parseISO(k+'-01')))}<small>${evs.length} kort</small></h2><div class="tl-list">${evs.map(item).join('')}</div></section>`;
   if (!upcoming.length) h += `<div class="empty" style="margin-left:-28px"><h3>Inget inbokat</h3>${open.length ? '' : ''}</div>`;
-  if (past.length) h += `<details class="past-wrap"><summary>Passerat (${past.length})</summary><div class="tl-list" style="margin-top:12px">${past.map(item).join('')}</div></details>`;
+  if (past.length) h += `<details class="past-wrap"><summary>Varit (${past.length})</summary><div class="tl-list" style="margin-top:12px">${past.map(item).join('')}</div></details>`;
   tl.innerHTML = h;
   $('#monthChips').innerHTML = [...groups.keys()].map(k => `<button type="button" class="chip pressable" data-month="m-${k}" aria-pressed="false">${k === 'utan' ? 'Utan datum' : cap(nodot(fmtMon.format(parseISO(k+'-01')))) + ' ' + k.slice(2,4)}</button>`).join('');
   bar.style.display = groups.size > 1 ? '' : 'none';
@@ -1629,6 +1633,7 @@ function enableDrag(d){
   sheet.addEventListener('pointermove', move); sheet.addEventListener('pointerup', end); sheet.addEventListener('pointercancel', end);
 }
 
+document.addEventListener('toggle', e => { if (e.target.id === 'pastFold') state.pastOpen = e.target.open; }, true);
 document.querySelectorAll('dialog').forEach(d => d.addEventListener('close', () => { if (d._hist) { d._hist = false; popSkip++; history.back(); } }));
 /* ---------- Detail ---------- */
 let currentId = null;
@@ -2062,7 +2067,7 @@ async function readPoster(blob, cropped){
   const prompt = `Du läser en bild av en affisch, ett biljettmejl eller en skärmdump av en webbsida för ett evenemang (konsert, teater, bio, resa, sport, mat, fest). Dagens datum är ${todayISO()} (ÅÅÅÅ-MM-DD), Sverige.
 Svara med ENBART ett JSON-objekt:
 {"title": string, "date": "ÅÅÅÅ-MM-DD" eller null, "dateKind": "exakt" | "fran" | "period" | "okant", "endDate": "ÅÅÅÅ-MM-DD" eller null, "time": "HH:MM" eller null, "venue": string eller null, "city": string eller null, "category": en av ${JSON.stringify(Object.keys(CATS))}, "url": string eller null, "note": string eller null, "crop": {"x":0-1,"y":0-1,"w":0-1,"h":0-1}, "confidence": 0-1}
-Regler: title = evenemangets namn (artist, film, föreställning), inte tagline. dateKind: "exakt" när datumet är en specifik speldag (konsert, match, föreställning ett visst datum); "fran" när det är en premiär eller ett släpp som sedan går löpande (bio "premiär 4 december", "exklusivt på bio 13 november", "från och med"): då är date = premiärdagen; "period" när start och slut anges; "okant" när inget datum finns. Saknas år: välj nästa gång datumet infaller efter i dag. Står bara ett slutdatum ("ends 3 Jan", "spelas till"): sätt endDate och date=null. Flera datum: första i date, resten i note. "Biopremiär 4 december" är ett datum. Hittas inget datum: date=null. venue = lokal/scen, city = stad om den syns eller är självklar (London för West End). note: kort, t.ex. support-akt, "bäst tillgänglighet i december", biljettsäljare. crop = den del av bilden som är själva affischen/omslagsbilden, som andelar av hela bilden: skär bort ramar, väggar, gardiner, statusfält och webbläsarens adressfält, men behåll hela affischen. Om hela bilden är affischen: {"x":0,"y":0,"w":1,"h":1}.${cropped ? ' Bilden är redan beskuren till själva affischen och visas i högre upplösning: läs noga av små texter (datum, tid, lokal, biljettsäljare, webbadress) och sätt crop till hela bilden.' : ''}`;
+Regler: title = evenemangets namn (artist, film, föreställning), inte tagline. dateKind: "exakt" när datumet är en specifik speldag (konsert, match, föreställning ett visst datum); "fran" när det är en premiär eller ett släpp som sedan går löpande (bio "premiär 4 december", "exklusivt på bio 13 november", "från och med"): då är date = premiärdagen; "period" när start och slut anges; "okant" när inget datum finns. Saknas år: välj nästa gång datumet infaller efter i dag, utom för en premiär eller något som redan pågår: välj då den senaste gången datumet inföll, även bakåt i tiden. Står bara ett slutdatum ("ends 3 Jan", "spelas till"): sätt endDate och date=null. Flera datum: första i date, resten i note. "Biopremiär 4 december" är ett datum. Hittas inget datum: date=null. venue = lokal/scen, city = stad om den syns eller är självklar (London för West End). note: kort, t.ex. support-akt, "bäst tillgänglighet i december", biljettsäljare. crop = den del av bilden som är själva affischen/omslagsbilden, som andelar av hela bilden: skär bort ramar, väggar, gardiner, statusfält och webbläsarens adressfält, men behåll hela affischen. Om hela bilden är affischen: {"x":0,"y":0,"w":1,"h":1}.${cropped ? ' Bilden är redan beskuren till själva affischen och visas i högre upplösning: läs noga av små texter (datum, tid, lokal, biljettsäljare, webbadress) och sätt crop till hela bilden.' : ''}`;
   if (state.sample && state.sampleImages) { try { return await state.sample.json(prompt, { images: [blob], modelTier: 'default', cache: false }); } catch (e) { if (e && e.code === 'not_granted') { state.sampleImages = false; } return null; } }
   try {
     const b64 = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.readAsDataURL(blob); });
@@ -2267,7 +2272,7 @@ function renderFindRes(){
 /* ---------- Mer ---------- */
 const LS_THEME = 'bento.theme';
 function setTheme(v){ if (v === 'auto' || !v) { html.removeAttribute('data-theme'); } else html.dataset.theme = v; lsSet(LS_THEME, v || 'auto'); document.querySelectorAll('#themeSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.theme === (v || 'auto')))); }
-function openMenu(fromEl){ setTheme(lsGet(LS_THEME) || 'auto'); $('#about').textContent = ''; openSheet($('#menu'), fromEl, 'fab'); }
+function openMenu(fromEl){ setTheme(lsGet(LS_THEME) || 'auto'); $('#about').textContent = window.BENTO_VERSION ? `Version ${window.BENTO_VERSION}` : ''; openSheet($('#menu'), fromEl, 'fab'); }
 
 /* ---------- Toast ---------- */
 let toastT, toastOnAct = null;

@@ -62,6 +62,7 @@ Sök på webben och ta reda på vilket/vilka verkliga evenemang det gäller. Hit
 Är det en lokal (t.ex. "Dramaten 19:30") eller något vagt: föreslå de mest troliga kommande föreställningarna där, gärna med den tid som angavs.
 Är det en film: svensk biopremiär (dateKind "fran"). En föreställning med många speldagar: premiär eller första datum + endDate, dateKind "period", och lista några kommande speldagar i "dates".
 Gissa aldrig datum som inte står någonstans; lämna då date tomt och dateKind "okant".
+Har något redan haft premiär eller pågår det just nu: ange det verkliga premiär- eller startdatumet även om det ligger bakåt i tiden (dateKind "fran" eller "period", med endDate om slutdatum är känt). Flytta aldrig ett passerat datum till nästa år.
 
 Resor (category "resa"): titel som "Resa till X", date = avresa, endDate = hemresa, dateKind "exakt". Ingen url till turistsajter; url bara om det finns en bokning. Inga note-gissningar.
 Markera med "match": true de kandidater som exakt motsvarar det användaren skrev (rätt dag, tid och plats). Andra rimliga alternativ (andra dagar, närliggande evenemang) får "match": false.
